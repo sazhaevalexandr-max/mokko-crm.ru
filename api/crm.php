@@ -478,8 +478,9 @@ function handleCategory()
             $name   = mokko_str(isset($p['name']) ? $p['name'] : 'Название', 255);
             $status = (isset($p['status']) && $p['status'] === 'off') ? 'off' : 'on';
 
+            $name = ($name !== '' ? $name : 'Название');
             $s = $pdo->prepare('INSERT INTO categories (uid, name, status) VALUES (?, ?, ?)');
-            $s->execute(array($uid, $name !== '' ? $name : 'Название', $status));
+            $s->execute(array($uid, $name, $status));
             $id = (int)$pdo->lastInsertId();
 
             mokko_json(array('Id' => $id, 'name' => $name, 'status' => $status));

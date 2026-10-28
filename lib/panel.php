@@ -707,7 +707,7 @@ $(document).ready(function() {
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/charts.js?v=1"></script>
 
 
-<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel.js?ver=15"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel.js?ver=16"></script>
 
 
 

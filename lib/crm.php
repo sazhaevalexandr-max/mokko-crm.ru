@@ -429,7 +429,7 @@ $(document).ready(function() {
 <script src="<?= BASE_PATH ?>/js/moment.js"></script>
 <script src="<?= BASE_PATH ?>/js/date.js"></script>
 
-<script type="text/javascript" src="<?= BASE_PATH ?>/js/crm.js?ver=19"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/crm.js?ver=20"></script>
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/interface.js"></script>
 
 <? require_once('metrika.php'); ?>

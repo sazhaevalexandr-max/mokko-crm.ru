@@ -937,6 +937,7 @@ $(document).ready(function($) {
                                                   
                     });
                   
+                  var activeCats = {};
                   function load_menu(){
                   $.ajax({
                          type: 'GET',
@@ -945,8 +946,11 @@ $(document).ready(function($) {
                          $(".filter_items").empty().append('<button type="button" show="all" class="btn btn-primary active">Все</button>');
                          var menus = data;
                          //console.log(menus);
+                         activeCats = {};
                          $.each(menus, function (i,item){
-                                
+                                // в кассе показываем только активные категории (флажок «Показывать в кассе»)
+                                if(item.status != 'on'){ return true; }
+                                activeCats[item.id] = true;
                                 $(".filter_items").append('<button type="button" show='+item.id+' class="btn btn-primary" index="'+i+'"><span>'+item.name+'</span></button>');
                           });
                         // $('.filter_items').append('<a type="button" class="btn btn-default refresh_menu"><i class="glyphicon glyphicon-refresh"></i></a>');
@@ -978,7 +982,9 @@ $(document).ready(function($) {
                          var items = (typeof data === 'string') ? JSON.parse(data) : data;
                          console.log("items:", data);
                          $.each(items, function (i,item){
-                                
+                                // товары из скрытых категорий в кассе не показываем (режим «Все»)
+                                if(!activeCats[item.type]){ return true; }
+
                                 if(item.em == '1'){
                                 item.em = 'Мл.';
                                 }
