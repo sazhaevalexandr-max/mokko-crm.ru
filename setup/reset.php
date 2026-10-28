@@ -52,7 +52,7 @@ if (!empty($db['name']) && preg_match('/^[A-Za-z0-9_]+$/', (string)$db['name']))
     }
 }
 
-foreach (array('config/installed.lock', 'config/license.php', 'config/db_local.php') as $file) {
+foreach (array('config/installed.lock', 'config/license.php', 'config/db_local.php', 'config/maintenance.flag') as $file) {
     $path = $root . '/' . $file;
     if (is_file($path)) {
         if (@unlink($path)) {

@@ -515,3 +515,82 @@ function mokko_password_fingerprint($hash)
 {
     return substr(hash('sha256', 'mokko-pv|' . (string)$hash), 0, 32);
 }
+
+/**
+ * Административная сессия: владелец аккаунта (sid = uid), а не бариста.
+ * Роль в БД проверяется отдельно на страницах, где это важно.
+ */
+function mokko_is_admin_session()
+{
+    return mokko_is_authenticated()
+        && isset($_SESSION['sid'])
+        && $_SESSION['sid'] === 'uid';
+}
+
+/**
+ * CSRF-токен для форм и загрузки файлов.
+ *
+ * JSON-API дополнительно проверяет Origin/Referer, но загрузка ZIP идёт
+ * обычным multipart-запросом, поэтому для неё нужен отдельный токен.
+ */
+function mokko_csrf_token()
+{
+    if (empty($_SESSION['csrf']) || !is_string($_SESSION['csrf'])) {
+        $_SESSION['csrf'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf'];
+}
+
+function mokko_csrf_valid($token = null)
+{
+    if ($token === null) {
+        $token = isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : '';
+    }
+    return is_string($token)
+        && $token !== ''
+        && !empty($_SESSION['csrf'])
+        && is_string($_SESSION['csrf'])
+        && hash_equals($_SESSION['csrf'], $token);
+}
+
+function mokko_require_csrf()
+{
+    if (!mokko_csrf_valid()) {
+        mokko_fail('invalid csrf token', 403);
+    }
+}
+
+/**
+ * Режим обслуживания. Пока существует config/maintenance.flag, посетители
+ * получают 503, а администратор может завершить обновление или откатиться.
+ */
+function mokko_maintenance_file()
+{
+    return dirname(__DIR__) . '/config/maintenance.flag';
+}
+
+function mokko_in_maintenance()
+{
+    return is_file(mokko_maintenance_file());
+}
+
+function mokko_maintenance_begin($reason = '')
+{
+    $data = array(
+        'since'  => date('c'),
+        'reason' => (string)$reason,
+        'pid'    => function_exists('getmypid') ? getmypid() : 0,
+    );
+    $ok = @file_put_contents(
+        mokko_maintenance_file(),
+        json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        LOCK_EX
+    );
+    return $ok !== false;
+}
+
+function mokko_maintenance_end()
+{
+    $file = mokko_maintenance_file();
+    return !is_file($file) || @unlink($file);
+}

@@ -24,6 +24,20 @@ DirectoryIndex index.php index.html
     php_flag log_errors On
 </IfModule>
 
+# ── Лимиты для загрузки пакетов обновлений ─────────────────────────────────
+<IfModule php7_module>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 72M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 72M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
 # ── Запрет доступа к служебным/резервным файлам ─────────────────────────────
 <FilesMatch "(^\.|~$|\.(bak|old|orig|save|swp|swo|tmp|sql|log|ini|env|dist|lock)$|\.html-$|^composer\.(json|lock)$|^README.*$|^SECURITY.*$)">
     <IfModule mod_authz_core.c>
@@ -46,6 +60,9 @@ RewriteBase /mokko-crm.ru
 # файл .git/config ушёл бы в отдачу статикой.
 RewriteRule (^|/)\.(git|svn|hg|bzr)(/|$) - [NC,R=404,L]
 
+# Служебные каталоги обновлений/резервных копий наружу не отдаём.
+RewriteRule ^storage(/|$) - [R=404,L]
+
 # Remove trailing slashes (skip directories)
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} ^(.+)/$
@@ -61,6 +78,7 @@ RewriteRule ^subscribe$   index.php?view=subscribe [L]
 RewriteRule ^login$       index.php?view=login     [L]
 RewriteRule ^login_dev$   index.php?view=login     [L]
 RewriteRule ^panel$       index.php?view=panel     [L,QSA]
+RewriteRule ^updates$     index.php?view=updates   [L,QSA]
 RewriteRule ^crm$         index.php?view=crm       [L,QSA]
 RewriteRule ^enter$       index.php?view=enter     [L,QSA]
 RewriteRule ^repair$      index.php?view=password  [L]

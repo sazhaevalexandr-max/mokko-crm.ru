@@ -438,6 +438,14 @@ if ($isPost) {
         write_php_file($LICENSE_FILE, $licPhp);
         write_php_file($LOCK_FILE, "<?php\n// Установка выполнена " . date('c') . ". Удалите папку setup/.\nreturn true;\n");
 
+        // Персональный секрет подписи обновлений: привязан к этой копии
+        // (ключ установки + домен). Тем же секретом вы на своей стороне
+        // подписываете апдейты именно для этого домена:
+        //   php tools/build-update.php src out.zip --domain=<домен> --key=<ключ установки>
+        // Пакет, собранный для другого домена, на этой копии не встанет.
+        $updateSecret = hash_hmac('sha256', 'mokko-update|' . $domain, $installKey);
+        @file_put_contents($CONFIG_DIR . '/update.secret', $updateSecret . "\n", LOCK_EX);
+
         $basePath = rtrim(str_replace('\\', '/', dirname(dirname(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '/'))), '/');
         $loginUrl = (mokko_is_https() ? 'https' : 'http') . '://' . mokko_host() . $basePath . '/login';
 

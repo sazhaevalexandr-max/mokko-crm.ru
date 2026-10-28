@@ -18,6 +18,12 @@ mokko_harden_errors();
 mokko_session_start();
 mokko_send_security_headers();
 
+// Пока идёт обновление, не отдаём данные из полуобновлённого приложения.
+if (mokko_in_maintenance()) {
+    header('Retry-After: 120');
+    mokko_json(array('error' => 'maintenance'), 503);
+}
+
 require_once dirname(__DIR__) . '/config/db.php';
 
 $uid = mokko_require_auth();
@@ -112,6 +118,7 @@ $staffPermissions = array(
     'staff'      => array('newpassword'),
     'category'   => array('load'),
     'items'      => array('load'),
+    'user'       => array('unlock'),
 );
 
 if (!$isAdmin) {
@@ -229,23 +236,25 @@ function mokko_phone_clean($phone)
 }
 
 /**
- * Проверка e-mail сотрудника: формат, длина и глобальная уникальность
- * (логин ищется и среди владельцев, и среди сотрудников).
+ * Проверка логина сотрудника: непустой, без пробелов, в пределах длины и
+ * глобально уникальный (логин ищется и среди владельцев, и среди сотрудников).
+ * Почта сотруднику не нужна — это просто логин для входа в кассу, поэтому
+ * формат e-mail больше не требуется. Хранится по-прежнему в колонке `email`.
  */
-function mokko_staff_email_error($pdo, $email, $excludeId = 0)
+function mokko_staff_login_error($pdo, $login, $excludeId = 0)
 {
-    if ($email === '' || strlen($email) > 254 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return 'invalid email';
+    if ($login === '' || mb_strlen($login, 'UTF-8') > 60 || preg_match('/\s/u', $login)) {
+        return 'invalid login';
     }
     $u = $pdo->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
-    $u->execute(array($email));
+    $u->execute(array($login));
     if ($u->fetch(PDO::FETCH_ASSOC)) {
-        return 'email already used';
+        return 'login already used';
     }
     $s = $pdo->prepare('SELECT id FROM staff WHERE email = ? AND id <> ? LIMIT 1');
-    $s->execute(array($email, (int)$excludeId));
+    $s->execute(array($login, (int)$excludeId));
     if ($s->fetch(PDO::FETCH_ASSOC)) {
-        return 'email already used';
+        return 'login already used';
     }
     return '';
 }
@@ -353,13 +362,13 @@ function handleStaff()
             }
             $name     = mokko_str(isset($p['name']) ? $p['name'] : '', 100);
             $lastname = mokko_str(isset($p['lastname']) ? $p['lastname'] : '', 100);
-            $login    = mokko_str(isset($p['login']) ? $p['login'] : '', 254);
+            $login    = mokko_str(isset($p['login']) ? $p['login'] : '', 60);
             $phone    = mokko_str(isset($p['phone']) ? $p['phone'] : '', 20);
             $rate     = (float)(isset($p['rate']) ? $p['rate'] : 0);
 
-            $emailErr = mokko_staff_email_error($pdo, $login);
-            if ($emailErr !== '') {
-                mokko_json(array('error' => $emailErr));
+            $loginErr = mokko_staff_login_error($pdo, $login);
+            if ($loginErr !== '') {
+                mokko_json(array('error' => $loginErr));
             }
 
             $s = $pdo->prepare('INSERT INTO staff (uid, name, lastname, email, phone, rate, password_hash) VALUES (?, ?, ?, ?, ?, ?, ?)');
@@ -376,13 +385,13 @@ function handleStaff()
             $id       = (int)(isset($p['id']) ? $p['id'] : 0);
             $name     = mokko_str(isset($p['name']) ? $p['name'] : '', 100);
             $lastname = mokko_str(isset($p['lastname']) ? $p['lastname'] : '', 100);
-            $login    = mokko_str(isset($p['login']) ? $p['login'] : '', 254);
+            $login    = mokko_str(isset($p['login']) ? $p['login'] : '', 60);
             $phone    = mokko_str(isset($p['phone']) ? $p['phone'] : '', 20);
             $rate     = (float)(isset($p['rate']) ? $p['rate'] : 0);
 
-            $emailErr = mokko_staff_email_error($pdo, $login, $id);
-            if ($emailErr !== '') {
-                mokko_json(array('error' => $emailErr));
+            $loginErr = mokko_staff_login_error($pdo, $login, $id);
+            if ($loginErr !== '') {
+                mokko_json(array('error' => $loginErr));
             }
 
             $s = $pdo->prepare('UPDATE staff SET name = ?, lastname = ?, email = ?, phone = ?, rate = ? WHERE id = ? AND uid = ?');
@@ -928,18 +937,19 @@ function handleBuy()
 // ─── user ───────────────────────────────────────────────────────────────────
 function handleUser()
 {
-    global $pdo, $uid, $action, $p;
+    global $pdo, $uid, $action, $p, $sessionHash;
 
     switch ($action) {
         case 'unlock':
             // Проверка пароля — тоже оракул: 10 попыток на пользователя за 5 минут.
             mokko_rate_limit_guard('pwchk_' . (int)$uid, 10, 300);
             $pass = isset($p['password']) ? (string)$p['password'] : '';
-            $u = $pdo->prepare('SELECT password_hash FROM users WHERE id = ? LIMIT 1');
-            $u->execute(array($uid));
-            $row = $u->fetch(PDO::FETCH_ASSOC);
+            // Разблокировку делает тот, кто сейчас в кассе: у владельца — его
+            // пароль (users), у бариста — его собственный (staff). $sessionHash
+            // уже вычислен вверху как хэш текущего актёра.
+            $ok = ($sessionHash !== '' && password_verify($pass, (string)$sessionHash));
 
-            mokko_json(array('unlock' => ($row && password_verify($pass, (string)$row['password_hash'])) ? 'true' : 'false'));
+            mokko_json(array('unlock' => $ok ? 'true' : 'false'));
             break;
 
         case 'newpassword':

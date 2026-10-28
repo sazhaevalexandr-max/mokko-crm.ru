@@ -12,6 +12,10 @@
 
 define('MOKKO', true);
 
+if (is_file(__DIR__ . '/config/version.php')) {
+    require_once __DIR__ . '/config/version.php';
+}
+
 require_once __DIR__ . '/config/security.php';
 mokko_harden_errors();
 mokko_session_start();
@@ -28,6 +32,29 @@ if (!mokko_is_installed()) {
     header('Location: ' . BASE_URL . '/setup/install.php');
     exit;
 }
+
+// Режим обслуживания на время обновления: администратору сайт доступен,
+// остальные видят 503 вместо полуобновлённого интерфейса.
+if (mokko_in_maintenance() && !mokko_is_admin_session()) {
+    http_response_code(503);
+    header('Retry-After: 120');
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<!doctype html><html lang="ru"><head><meta charset="utf-8">'
+        . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        . '<meta name="robots" content="noindex"><title>Обслуживание — MOKKO CRM</title>'
+        . '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;'
+        . 'background:#0f0d0b;color:#f2ece4;font:16px/1.6 Manrope,-apple-system,Segoe UI,Roboto,Arial,sans-serif}'
+        . '.b{max-width:460px;padding:32px;text-align:center}.b h1{font-size:24px;margin:0 0 10px}'
+        . '.b p{color:#bdb2a6;margin:0}.b span{display:inline-block;margin-top:18px;color:#d9a46a;font-size:13px}'
+        . '</style></head><body><div class="b"><h1>Идёт обновление</h1>'
+        . '<p>Мы ненадолго закрыли доступ, чтобы обновить систему. Загляните через минуту.</p>'
+        . '<span>MOKKO CRM</span></div></body></html>';
+    exit;
+}
+
+// Модули подключаются после проверки установки: их bootstrap может работать с БД.
+require_once __DIR__ . '/lib/modules.php';
+mokko_modules_boot();
 
 /**
  * Нормализация пользовательской строки.
@@ -74,13 +101,30 @@ if ($view !== '') {
             }
             break;
 
+        case 'updates':
+            if (mokko_is_admin_session()) {
+                require __DIR__ . '/lib/updates.php';
+            } else {
+                header('Location: ' . BASE_URL . '/login');
+            }
+            break;
+
         case 'login':
-        case 'signup':
             if (mokko_is_authenticated()) {
                 header('Location: ' . BASE_URL . '/panel');
                 exit;
             }
             mokko_render($view);
+            break;
+
+        // Коробочная версия: регистрация отключена — администратор создаётся
+        // установщиком (один на копию). Страница lib/signup.php сохранена, но
+        // не открывается: заход на /signup перенаправляется на вход. Чтобы
+        // вернуть регистрацию — верните 'signup' в case 'login' выше,
+        // раскомментируйте ссылку на странице входа и гейт в api/auth.php.
+        case 'signup':
+            header('Location: ' . BASE_URL . '/login');
+            exit;
             break;
 
         case 'password':

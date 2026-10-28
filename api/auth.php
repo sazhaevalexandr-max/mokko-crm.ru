@@ -154,6 +154,20 @@ function handleRegister()
 {
     $data = mokko_json_input();
 
+    // Коробочная версия: один администратор на копию. Открытая регистрация
+    // отключена (ссылка на странице входа и маршрут /signup закрыты). Этот
+    // гейт — страховка на уровне API: если администратор уже заведён
+    // (его создаёт установщик), регистрация отклоняется. Чтобы вернуть
+    // открытую регистрацию — удалите этот блок.
+    try {
+        $already = (int)getDB()->query('SELECT COUNT(*) FROM users')->fetchColumn();
+    } catch (Exception $e) {
+        $already = 1; // при сбое БД безопаснее считать, что администратор уже есть
+    }
+    if ($already >= 1) {
+        mokko_json(array('error' => 'registration closed'), 403);
+    }
+
     $login    = isset($data['login']) && is_string($data['login']) ? trim($data['login']) : '';
     $password = isset($data['password']) && is_string($data['password']) ? $data['password'] : '';
     $name     = isset($data['name']) && is_string($data['name']) ? mokko_str($data['name'], 100) : '';

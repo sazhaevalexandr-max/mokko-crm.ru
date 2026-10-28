@@ -1,5 +1,14 @@
 <?php
     if(!defined('MOKKO'))die;
+
+    require_once dirname(__DIR__) . '/lib/modules.php';
+    if (is_file(dirname(__DIR__) . '/config/version.php')) {
+        require_once dirname(__DIR__) . '/config/version.php';
+    }
+    if (!defined('MOKKO_VERSION')) {
+        define('MOKKO_VERSION', '1.0.0');
+    }
+    mokko_modules_boot();
 ?>
 
 
@@ -34,6 +43,7 @@
 <link rel="stylesheet" href="<?= BASE_PATH ?>/css/chartist-plugin-tooltip.css">
 
 <link href="<?= BASE_PATH ?>/css/theme.css?v=34" rel="stylesheet">
+<?php mokko_hook('panel.head'); ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/bootstrap-4.6.2.bundle.min.js"></script>
@@ -83,6 +93,18 @@ var sid = <?= mokko_js(isset($_SESSION['sid']) ? (string)$_SESSION['sid'] : '') 
 <li><a href="#lager" module="lager">Склад</a></li>
 <li><a href="#options" madule="options">Настройки</a></li>
 <li><a href="#feedback">Техподдержка</a></li>
+<?php mokko_hook('panel.nav'); ?>
+</ul>
+
+<style>
+.nav-sidebar.nav-system{list-style:none;margin:6px 0 0;padding:8px var(--s3) 0;border-top:1px solid var(--border);}
+.nav-sidebar.nav-system>li{margin:2px 0;}
+.nav-sidebar.nav-system>li>a{position:relative;display:flex;align-items:center;gap:8px;padding:9px var(--s3);border-radius:var(--radius-sm);font-size:14px;font-weight:550;color:var(--text-dim);transition:background-color var(--t-fast) var(--ease),color var(--t-fast) var(--ease);}
+.nav-sidebar.nav-system>li>a:hover{background:var(--hover);color:var(--text);}
+.nav-sidebar.nav-system .upd-ver{margin-left:auto;font-family:var(--mono);font-size:11px;line-height:1;color:var(--text-mute);background:var(--surface-3);border:1px solid var(--border);border-radius:999px;padding:3px 7px;}
+</style>
+<ul class="nav nav-sidebar nav-system">
+<li><a href="<?= BASE_URL ?>/updates">Обновления <span class="upd-ver">v<?= mokko_h(MOKKO_VERSION) ?></span></a></li>
 </ul>
 
 <div class="ballance">
@@ -586,8 +608,18 @@ var sid = <?= mokko_js(isset($_SESSION['sid']) ? (string)$_SESSION['sid'] : '') 
 </div>
 
 <div class="layer" id="feedback">
-<center><h3>Мы тут еще не все настроили, но техподдержка скоро будет доступна! :)</h3><img src="https://d30y9cdsu7xlg0.cloudfront.net/png/116901-200.png" style="opacity:0.5;"><center>
+<style>
+#feedback .feedback-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;min-height:60vh;padding:24px 16px;text-align:center;}
+#feedback .feedback-empty video{width:auto;max-width:100%;max-height:360px;border-radius:16px;box-shadow:0 12px 44px rgba(0,0,0,.45);display:block;}
+#feedback .feedback-empty h3{margin:0;max-width:540px;font-weight:600;line-height:1.45;}
+</style>
+<div class="feedback-empty">
+<video src="<?= BASE_PATH ?>/images/support-cat.mp4?v=1" poster="<?= BASE_PATH ?>/images/support-cat.jpg?v=1" autoplay muted loop playsinline preload="metadata"></video>
+<h3>тут пока ничего нет Т_Т</h3>
 </div>
+</div>
+
+<?php mokko_hook('panel.layers'); ?>
 
 
 
@@ -707,7 +739,7 @@ $(document).ready(function() {
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/charts.js?v=1"></script>
 
 
-<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel.js?ver=16"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel.js?ver=17"></script>
 
 
 
@@ -715,6 +747,8 @@ $(document).ready(function() {
 
 
 <? require_once('metrika.php'); ?>
+
+<?php mokko_hook('panel.footer'); ?>
 
 </body>
 </html>

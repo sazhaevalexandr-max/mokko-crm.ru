@@ -1,0 +1,421 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOKKO CRM — обновления. Оформление в духе установщика начала 2000-х:
+   серый фон, Tahoma, вдавленные поля, выпуклые кнопки, дискета.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body.upd-body {
+    background: #d4d0c8;
+    color: #000;
+    font: 12px Tahoma, Verdana, Arial, sans-serif;
+    padding: 18px 14px 34px;
+}
+
+a { color: #003399; }
+a:visited { color: #551a8b; }
+
+.upd-page { width: 900px; max-width: 100%; margin: 0 auto; }
+
+.upd-masthead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 0 8px;
+}
+.upd-masthead h1 {
+    margin: 0;
+    font: bold 19px Tahoma, Verdana, Arial, sans-serif;
+    letter-spacing: -.2px;
+}
+.upd-masthead h1 span { color: #0a246a; }
+.upd-sub { margin-top: 2px; font: 11px Tahoma, sans-serif; color: #555; }
+.upd-sub b { color: #000; }
+
+.upd-top-back { font: 11px Tahoma, sans-serif; white-space: nowrap; }
+
+hr.upd-rule {
+    border: 0;
+    border-top: 1px solid #808080;
+    border-bottom: 1px solid #fff;
+    margin: 0 0 12px;
+}
+
+.upd-layout { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+
+.upd-side {
+    width: 208px;
+    flex: 0 0 208px;
+    background: #fff;
+    border: 1px solid #808080;
+    padding: 10px 10px 8px;
+}
+.upd-disk { text-align: center; margin: 2px 0 5px; }
+.upd-disk svg { display: block; margin: 0 auto; }
+.upd-side-cap { text-align: center; font: 10px Tahoma, sans-serif; color: #555; line-height: 1.45; }
+.upd-side-cap b { color: #000; font-size: 11px; }
+
+.upd-facts { width: 100%; border-collapse: collapse; margin-top: 9px; }
+.upd-facts th,
+.upd-facts td { padding: 3px 0; vertical-align: top; border-top: 1px solid #c8c4bc; }
+.upd-facts tr:first-child th,
+.upd-facts tr:first-child td { border-top: 0; }
+.upd-facts th { text-align: left; font: 10px Tahoma, sans-serif; color: #555; font-weight: normal; }
+.upd-facts td { text-align: right; font: 10px Tahoma, sans-serif; color: #000; }
+.upd-facts td b { font-size: 10px; }
+
+.upd-side-note {
+    margin-top: 9px;
+    padding-top: 7px;
+    border-top: 1px solid #c8c4bc;
+    font: 10px Tahoma, sans-serif;
+    color: #555;
+    line-height: 1.45;
+}
+
+.upd-main { flex: 1 1 0%; min-width: 0; }
+
+/* ── Группы ──────────────────────────────────────────────────────────────── */
+
+.group,
+.upd-preview {
+    border: 1px solid #808080;
+    margin: 0 0 12px;
+    padding: 10px 12px 12px;
+    background: #e6e2da;
+}
+
+.upd-group-title {
+    margin: -10px -12px 10px;
+    padding: 3px 8px;
+    background: #d4d0c8;
+    border-bottom: 1px solid #808080;
+    font: bold 11px Tahoma, sans-serif;
+}
+.upd-count {
+    float: right;
+    font: 10px Tahoma, sans-serif;
+    color: #555;
+}
+
+/* ── Дроп-зона ───────────────────────────────────────────────────────────── */
+
+.upd-drop {
+    background: #fff;
+    border: 2px dashed #808080;
+    padding: 20px 14px 18px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+}
+.upd-drop:hover,
+.upd-drop:focus,
+.upd-drop.is-over { background: #f4f1e8; border-color: #0a246a; }
+.upd-drop.is-disabled { opacity: .55; cursor: not-allowed; }
+
+.upd-drop-icon { display: block; margin: 0 auto 7px; }
+.upd-drop-text b { display: block; font: bold 12px Tahoma, sans-serif; }
+.upd-drop-text span { display: block; margin-top: 2px; font: 11px Tahoma, sans-serif; color: #555; }
+.upd-drop-hint { margin-top: 7px; font: 10px "Courier New", monospace; color: #666; }
+
+.upd-progress { margin-top: 8px; }
+.upd-progress-bar {
+    height: 13px;
+    background: #fff;
+    border: 2px inset #d4d0c8;
+    padding: 1px;
+}
+.upd-progress-bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: #0a246a;
+}
+.upd-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 3px;
+    font: 10px Tahoma, sans-serif;
+    color: #555;
+}
+
+.upd-hint {
+    margin-top: 7px;
+    font: 10px Tahoma, sans-serif;
+    color: #555;
+    line-height: 1.5;
+}
+.upd-text {
+    font: 11px Tahoma, sans-serif;
+    line-height: 1.55;
+    margin-bottom: 8px;
+}
+
+code {
+    font: 10px "Courier New", monospace;
+    background: #f0ede6;
+    border: 1px solid #d8d3c8;
+    padding: 0 3px;
+}
+
+/* ── Предпросмотр ────────────────────────────────────────────────────────── */
+
+.upd-preview { background: #f7f4ec; scroll-margin-top: 10px; }
+
+.upd-preview-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+.upd-preview-title { margin: 0; font: bold 13px Tahoma, sans-serif; }
+.upd-preview-sub { margin-top: 1px; font: 10px "Courier New", monospace; color: #666; }
+
+.upd-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 6px;
+    margin: 9px 0;
+}
+.upd-fact {
+    background: #fff;
+    border: 1px solid #b8b3a9;
+    padding: 4px 6px;
+}
+.upd-fact span { display: block; font: 9px Tahoma, sans-serif; color: #666; text-transform: uppercase; letter-spacing: .04em; }
+.upd-fact b { display: block; margin-top: 1px; font: 11px Tahoma, sans-serif; }
+
+.upd-warnings {
+    margin: 0 0 8px;
+    padding: 5px 8px 5px 20px;
+    background: #fff6d8;
+    border: 1px solid #b08000;
+    color: #5a3a00;
+    font: 10px Tahoma, sans-serif;
+    line-height: 1.5;
+}
+.upd-warnings li { margin: 1px 0; }
+
+.upd-filebox {
+    max-height: 150px;
+    overflow: auto;
+    margin: 0 0 8px;
+    padding: 5px 7px;
+    background: #fff;
+    border: 2px inset #d4d0c8;
+    font: 10px "Courier New", monospace;
+    color: #333;
+}
+.upd-filebox div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 1px 0; }
+
+.upd-options { display: flex; flex-direction: column; gap: 4px; margin: 8px 0 10px; }
+
+.upd-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font: 11px Tahoma, sans-serif;
+    line-height: 1.4;
+    cursor: pointer;
+}
+.upd-check input { margin: 1px 0 0; flex: none; }
+
+.upd-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ── Кнопки ──────────────────────────────────────────────────────────────── */
+
+.upd-btn,
+button.upd-btn {
+    display: inline-block;
+    min-width: 88px;
+    padding: 4px 12px;
+    background: #d4d0c8;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+    font: 11px Tahoma, sans-serif;
+    color: #000;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+.upd-btn:hover { background: #dedad2; }
+.upd-btn:active {
+    border-color: #404040 #fff #fff #404040;
+    padding: 5px 11px 3px 13px;
+}
+.upd-btn:focus { outline: 1px dotted #000; outline-offset: -4px; }
+.upd-btn:disabled { color: #808080; cursor: default; }
+.upd-btn--primary { font-weight: bold; }
+.upd-btn--danger { color: #a00000; }
+.upd-btn--ghost { min-width: 0; }
+.upd-btn--sm { min-width: 0; padding: 2px 7px; font-size: 10px; }
+.upd-btn--sm:active { padding: 3px 6px 1px 8px; }
+
+.upd-linkbtn {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: #003399;
+    font: 11px Tahoma, sans-serif;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* ── Списки ──────────────────────────────────────────────────────────────── */
+
+.upd-list { display: flex; flex-direction: column; }
+
+.upd-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-top: 1px solid #c8c4bc;
+}
+.upd-row:first-child { border-top: 0; padding-top: 1px; }
+
+.upd-row-main { flex: 1 1 auto; min-width: 0; }
+.upd-row-title { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.upd-row-title b { font: bold 11px Tahoma, sans-serif; }
+.upd-row-sub {
+    margin-top: 1px;
+    font: 10px Tahoma, sans-serif;
+    color: #555;
+    overflow-wrap: anywhere;
+}
+.upd-row-actions { display: flex; gap: 5px; flex: none; }
+
+.upd-empty {
+    margin: 2px 0;
+    padding: 10px;
+    border: 1px dashed #b8b3a9;
+    background: #fff;
+    text-align: center;
+    font: 11px Tahoma, sans-serif;
+    color: #555;
+}
+
+.upd-badge {
+    display: inline-block;
+    padding: 0 4px;
+    border: 1px solid #808080;
+    background: #fff;
+    font: 9px Tahoma, sans-serif;
+    color: #333;
+    white-space: nowrap;
+}
+.upd-badge--ok { color: #006000; border-color: #006000; }
+.upd-badge--warn { color: #7a4a00; border-color: #7a4a00; background: #fff6d8; }
+.upd-badge--err { color: #a00000; border-color: #a00000; background: #ffecec; }
+
+/* ── Баннеры ─────────────────────────────────────────────────────────────── */
+
+.upd-banner {
+    margin: 0 0 10px;
+    padding: 7px 9px;
+    background: #ffffe1;
+    border: 1px solid #808080;
+    font: 11px Tahoma, sans-serif;
+    line-height: 1.5;
+}
+.upd-banner--warn { background: #fff6d8; }
+.upd-banner--error { background: #ffecec; color: #a00000; }
+
+/* ── Модальное окно и уведомление ────────────────────────────────────────── */
+
+.upd-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    max-width: min(680px, calc(100vw - 24px));
+    padding: 6px 12px;
+    background: #ffffe1;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, .25);
+    font: 11px Tahoma, sans-serif;
+    color: #000;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    z-index: 100;
+}
+.upd-toast--ok { background: #eaffea; }
+.upd-toast--err { background: #ffecec; color: #800000; }
+
+.upd-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, .35);
+    z-index: 90;
+}
+.upd-modal[hidden] { display: none; }
+
+.upd-modal-box {
+    width: 470px;
+    max-width: 100%;
+    max-height: 90vh;
+    overflow: auto;
+    background: #d4d0c8;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, .3);
+    padding: 12px 14px;
+}
+.upd-modal-box h3 { margin: 0 0 8px; font: bold 12px Tahoma, sans-serif; }
+.upd-modal-text { font: 11px Tahoma, sans-serif; line-height: 1.55; }
+.upd-modal-text p { margin: 0 0 7px; }
+.upd-modal-text .upd-filebox { white-space: pre-wrap; }
+.upd-modal-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 12px; }
+.upd-modal-box .upd-check { margin-top: 9px; }
+
+/* ── Подвал ──────────────────────────────────────────────────────────────── */
+
+.upd-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 6px;
+    border-top: 1px solid #b8b3a9;
+    font: 10px Tahoma, sans-serif;
+    color: #666;
+}
+
+.upd-led { animation: upd-blink 1.1s steps(2, start) infinite; }
+@keyframes upd-blink { 50% { opacity: .2; } }
+
+/* ── Адаптив ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 760px) {
+    .upd-layout { flex-direction: column; }
+    .upd-side {
+        width: 100%;
+        flex: 1 1 auto;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .upd-disk { margin: 0; }
+    .upd-side-cap { text-align: left; }
+    .upd-facts { flex: 1 1 180px; margin-top: 0; }
+    .upd-side-note { flex: 1 0 100%; margin-top: 2px; }
+    .upd-masthead h1 { font-size: 17px; }
+    .upd-top-back { font-size: 10px; }
+}
+
+@media (max-width: 520px) {
+    .upd-row { flex-wrap: wrap; }
+    .upd-row-actions { width: 100%; }
+    .upd-foot span:last-child { display: none; }
+}

@@ -124,7 +124,7 @@ $(document).ready(function($) {
                 ///
                                $.ajax({
                                       type: 'GET',
-                                      url: MOKKO_API + '/user/unlock/{"uid":"'+uid+'","key":"'+key+'","sid":"'+sid+'","password":"'+pass+'"}',
+                                      url: 'http://mokkoapi.azurewebsites.net/user/unlock/' + JSON.stringify({uid: uid, key: key, sid: sid, password: pass}).replace(/%/g, '%25'),
                                       success: function(data){
                                       console.log(data.unlock);
                                       if(data.unlock == "true"){
