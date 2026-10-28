@@ -2,12 +2,11 @@
 /**
  * Подключение к MySQL.
  *
- * Приоритет источников:
- *   1. переменные окружения MOKKO_DB_* (удобно для контейнеров/CI);
- *   2. config/db.local.php — файл, который создаёт установщик;
- *   3. локальные значения по умолчанию (XAMPP: root без пароля).
- *
- * config/db.local.php содержит пароль БД и не должен попадать в git.
+ * Приоритет учётных данных:
+ *   1) config/db_local.php — файл, который создаёт установщик (setup/install.php)
+ *      при установке на хостинге клиента; возвращает массив host/name/user/pass;
+ *   2) переменные окружения MOKKO_DB_HOST / MOKKO_DB_NAME / MOKKO_DB_USER / MOKKO_DB_PASS;
+ *   3) значения по умолчанию (localhost / mokko / root / пустой пароль).
  */
 
 function getDB()
@@ -18,35 +17,41 @@ function getDB()
         return $pdo;
     }
 
+    // Учётные данные, записанные установщиком, имеют наивысший приоритет.
     $local = array();
-    $localFile = __DIR__ . '/db.local.php';
+    $localFile = __DIR__ . '/db_local.php';
     if (is_file($localFile)) {
-        $loaded = @include $localFile;
+        $loaded = include $localFile;
         if (is_array($loaded)) {
             $local = $loaded;
         }
     }
 
-    $host = getenv('MOKKO_DB_HOST');
-    $port = getenv('MOKKO_DB_PORT');
-    $name = getenv('MOKKO_DB_NAME');
-    $user = getenv('MOKKO_DB_USER');
-    $pass = getenv('MOKKO_DB_PASS');
+    $pick = function ($key, $env) use ($local) {
+        if (isset($local[$key]) && $local[$key] !== '') {
+            return (string)$local[$key];
+        }
+        $v = getenv($env);
+        return ($v === false) ? null : $v;
+    };
 
-    if ($host === false || $host === '') { $host = isset($local['host']) ? (string)$local['host'] : 'localhost'; }
-    if ($port === false || $port === '') { $port = isset($local['port']) ? (string)$local['port'] : ''; }
-    if ($name === false || $name === '') { $name = isset($local['name']) ? (string)$local['name'] : 'mokko'; }
-    if ($user === false || $user === '') { $user = isset($local['user']) ? (string)$local['user'] : 'root'; }
-    if ($pass === false) { $pass = isset($local['pass']) ? (string)$local['pass'] : ''; }
-
-    $dsn = 'mysql:host=' . $host;
-    if ($port !== '') {
-        $dsn .= ';port=' . (int)$port;
+    $host = $pick('host', 'MOKKO_DB_HOST');
+    $name = $pick('name', 'MOKKO_DB_NAME');
+    $user = $pick('user', 'MOKKO_DB_USER');
+    // Пароль может быть намеренно пустым, поэтому отдельная обработка.
+    if (isset($local['pass'])) {
+        $pass = (string)$local['pass'];
+    } else {
+        $pass = getenv('MOKKO_DB_PASS');
     }
-    $dsn .= ';dbname=' . $name . ';charset=utf8mb4';
+
+    if ($host === null || $host === '') { $host = 'localhost'; }
+    if ($name === null || $name === '') { $name = 'mokko'; }
+    if ($user === null || $user === '') { $user = 'root'; }
+    if ($pass === false || $pass === null) { $pass = ''; }
 
     $pdo = new PDO(
-        $dsn,
+        'mysql:host=' . $host . ';dbname=' . $name . ';charset=utf8mb4',
         $user,
         $pass,
         array(

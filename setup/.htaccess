@@ -1,7 +1,10 @@
-# Установщик должен открываться с браузера на стороннем сервере, поэтому
-# Apache-ограничение «только localhost» снято. Сам установщик блокирует
-# повторную установку (в целевой базе уже есть пользователи) и может
-# требовать ключ MOKKO_SETUP_KEY.
-<IfModule mod_authz_core.c>
-    Require all granted
+# Ключ установки не должен отдаваться по HTTP
+<Files "install.key">
+    Require all denied
+</Files>
+<IfModule !mod_authz_core.c>
+    <Files "install.key">
+        Order allow,deny
+        Deny from all
+    </Files>
 </IfModule>

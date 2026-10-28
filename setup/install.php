@@ -1,48 +1,32 @@
 <?php
 /**
- * Установщик MOKKO CRM.
+ * Установщик MOKKO CRM (коробочная версия).
  *
- * Открывается автоматически, пока система не установлена (см. index.php).
- * Доступы к MySQL вводятся вручную: на стороннем сервере они отличаются
- * от локальных. После установки сохраняются в config/db.local.php,
- * откуда их читает config/db.php.
+ * Логика:
+ *  - доступ закрыт одноразовым ключом setup/install.key;
+ *  - доступы к MySQL вводятся в форме и сохраняются в config/db_local.php;
+ *  - схема базы — setup/schema.sql (10 таблиц);
+ *  - после установки пишутся config/license.php и config/installed.lock.
  *
- * Защита: страница блокируется, как только появляется config/db.local.php;
- * дополнительно проверяется, что в целевой базе нет пользователей.
- * Опционально можно задать MOKKO_SETUP_KEY и открывать установщик как
- * /setup/install.php?key=...
+ * Оформление — минималистичная веб-страница в духе CMS начала 2000-х:
+ * серый фон, Tahoma, вдавленные поля, выпуклые кнопки и дискета.
  */
 
 require_once dirname(__DIR__) . '/config/security.php';
 mokko_harden_errors();
-mokko_session_start();
 mokko_send_security_headers();
+mokko_session_start();
 
-$setupKey = getenv('MOKKO_SETUP_KEY');
-if ($setupKey !== false && $setupKey !== '') {
-    $given = isset($_GET['key']) ? (string)$_GET['key'] : '';
-    if (!hash_equals((string)$setupKey, $given)) {
-        http_response_code(403);
-        header('Content-Type: text/plain; charset=utf-8');
-        echo 'Forbidden: укажите ?key=... из MOKKO_SETUP_KEY';
-        exit;
-    }
-}
+$SETUP_DIR    = __DIR__;
+$CONFIG_DIR   = dirname(__DIR__) . '/config';
+$LOCK_FILE    = $CONFIG_DIR . '/installed.lock';
+$DBCONF_FILE  = $CONFIG_DIR . '/db_local.php';
+$LICENSE_FILE = $CONFIG_DIR . '/license.php';
+$KEY_FILE     = $SETUP_DIR . '/install.key';
 
-$method = isset($_SERVER['REQUEST_METHOD']) ? strtoupper((string)$_SERVER['REQUEST_METHOD']) : 'GET';
-if ($method !== 'GET' && $method !== 'POST') {
-    http_response_code(405);
-    header('Allow: GET, POST');
-    header('Content-Type: text/plain; charset=utf-8');
-    echo 'Method Not Allowed';
-    exit;
-}
+$isPost = (isset($_SERVER['REQUEST_METHOD']) && strtoupper((string)$_SERVER['REQUEST_METHOD']) === 'POST');
 
-$scriptDir = rtrim(str_replace('\\', '/', dirname(dirname(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '/'))), '/');
-$loginUrl  = $scriptDir . '/login';
-$localConfig = dirname(__DIR__) . '/config/db.local.php';
-
-// ── Оформление в духе установщиков 2000-х ───────────────────────────────────
+/* ── Оформление ─────────────────────────────────────────────────────────── */
 
 function setup_css()
 {
@@ -53,7 +37,7 @@ body {
     background: #d4d0c8;
     color: #000;
     font: 12px Tahoma, Verdana, Arial, sans-serif;
-    padding: 18px 12px 28px;
+    padding: 20px 14px 34px;
 }
 a { color: #003399; }
 a:visited { color: #551a8b; }
@@ -99,7 +83,7 @@ hr.rule { border: 0; border-top: 1px solid #808080; border-bottom: 1px solid #ff
 .seg i { flex: 1; height: 8px; background: #fff; border: 1px solid #808080; }
 .seg i.on { background: #0a246a; }
 
-.main { flex: 1 1 auto; min-width: 0; }
+.main { flex: 1 1 0%; min-width: 0; }
 
 .group { border: 1px solid #808080; margin: 0 0 12px; padding: 10px 12px 12px; }
 .group-title {
@@ -132,7 +116,7 @@ code { font: 10px "Courier New", monospace; background: #f0ede6; border: 1px sol
     padding: 7px 9px;
     margin: 0 0 12px;
     font: 11px Tahoma, sans-serif;
-    max-height: 170px;
+    max-height: 190px;
     overflow: auto;
 }
 .status .line { padding: 2px 0; line-height: 1.45; }
@@ -168,14 +152,6 @@ button:focus, .btn:focus { outline: 1px dotted #000; outline-offset: -4px; }
     color: #666;
 }
 
-.msgbox { display: flex; gap: 14px; padding: 14px 16px; background: #fff; border: 1px solid #808080; }
-.msgbox .icon { flex: 0 0 64px; }
-.msgbox h2 { margin: 0 0 8px; font: bold 12px Tahoma, sans-serif; }
-.msgbox p { margin: 0 0 8px; font: 11px Tahoma, sans-serif; line-height: 1.55; }
-.msgbox ul { margin: 0 0 10px; padding-left: 18px; font: 11px Tahoma, sans-serif; line-height: 1.5; }
-.msgbox .warn { color: #7a4a00; }
-.msgbox .err { color: #a00000; }
-
 .gallery-block { flex: 1 0 100%; margin-top: 18px; padding-top: 12px; border-top: 1px solid #b8b3a9; }
 .gallery-title { margin-bottom: 8px; font: bold 11px Tahoma, sans-serif; }
 .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -187,6 +163,24 @@ button:focus, .btn:focus { outline: 1px dotted #000; outline-offset: -4px; }
 .lightbox[hidden] { display: none; }
 .lightbox img { max-width: 96vw; max-height: 90vh; border: 2px solid #fff; background: #000; }
 .lb-close { position: absolute; top: 12px; right: 16px; width: 30px; height: 28px; min-width: 0; padding: 0; font: bold 15px Tahoma, sans-serif; }
+
+.msgbox { display: flex; gap: 14px; padding: 14px 16px; background: #fff; border: 1px solid #808080; }
+.msgbox .icon { flex: 0 0 64px; }
+.msgbox h2 { margin: 0 0 8px; font: bold 12px Tahoma, sans-serif; }
+.msgbox h3 { margin: 10px 0 6px; font: bold 11px Tahoma, sans-serif; }
+.msgbox p { margin: 0 0 8px; font: 11px Tahoma, sans-serif; line-height: 1.55; }
+.msgbox ul { margin: 0 0 10px; padding-left: 18px; font: 11px Tahoma, sans-serif; line-height: 1.5; }
+.msgbox .warn { color: #7a4a00; }
+.msgbox .err { color: #a00000; }
+.msgbox pre {
+    margin: 6px 0 10px;
+    padding: 8px 10px;
+    background: #f4f1e8;
+    border: 1px solid #c8c3b6;
+    font: 11px "Courier New", monospace;
+    line-height: 1.55;
+    overflow: auto;
+}
 
 .led { animation: blink 1.1s steps(2, start) infinite; }
 @keyframes blink { 50% { opacity: .2; } }
@@ -210,9 +204,6 @@ button:focus, .btn:focus { outline: 1px dotted #000; outline-offset: -4px; }
 CSS;
 }
 
-/**
- * Рисует дискету. $size — сторона в пикселях.
- */
 function setup_floppy_svg($size)
 {
     $svg = <<<'SVG'
@@ -246,21 +237,16 @@ SVG;
     return str_replace('%SIZE%', (int)$size, $svg);
 }
 
-/**
- * Открывает «окно» установщика.
- */
-function setup_header($title, $single = false)
+function setup_header($single = false)
 {
     echo '<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8">'
         . '<meta name="viewport" content="width=device-width, initial-scale=1">'
         . '<meta name="robots" content="noindex">'
-        . '<title>' . mokko_h($title) . '</title>'
+        . '<title>MOKKO CRM — установка</title>'
         . '<style>' . setup_css() . '</style></head><body>'
         . '<div class="page">'
-        . '<div class="page-head">'
-        . '<div><h1>MOKKO <span>CRM</span></h1>'
-        . '<div class="sub">Установка системы · версия 1.0</div></div>'
-        . '</div>'
+        . '<div class="page-head"><div><h1>MOKKO <span>CRM</span></h1>'
+        . '<div class="sub">Установка системы · версия 1.0</div></div></div>'
         . '<hr class="rule">'
         . '<div class="content' . ($single ? ' single' : '') . '">';
 }
@@ -272,68 +258,27 @@ function setup_footer($status)
         . '</div></body></html>';
 }
 
-// ── Блокировка повторной установки ──────────────────────────────────────────
-
-if (is_file($localConfig)) {
-    $dbOk = mokko_is_installed();
-    header('Content-Type: text/html; charset=utf-8');
-    setup_header('MOKKO CRM — установка', true);
-    echo '<div class="msgbox"><div class="icon">' . setup_floppy_svg(58) . '</div><div>'
-        . '<h2>Установка уже выполнена</h2>';
-    if ($dbOk) {
-        echo '<p>Система установлена, база доступна. Повторная установка через браузер заблокирована.</p>';
-    } else {
-        echo '<p class="err">Система уже настроена, но база недоступна. Проверьте доступы в <code>config/db.local.php</code>.</p>';
-    }
-    echo '<p><a class="btn" href="' . mokko_h($loginUrl) . '">Перейти к входу</a></p>'
-        . '<p class="warn">Переустановка: удалите <code>config/db.local.php</code> и базу данных, затем обновите страницу.</p>'
-        . '</div></div>';
-    setup_footer('Готово');
-    exit;
-}
-
-if (empty($_SESSION['setup_token'])) {
-    $_SESSION['setup_token'] = bin2hex(random_bytes(16));
-}
-$token = $_SESSION['setup_token'];
-
-$values = array(
-    'db_host'     => 'localhost',
-    'db_port'     => '3306',
-    'db_name'     => 'mokko',
-    'db_user'     => 'root',
-    'admin_email' => 'admin@mokko.local',
-    'admin_name'  => 'Администратор',
-);
-
-$errors = array();
-$report = array();
-$done   = false;
-$dbPass = '';
-
-/**
- * Подключение к MySQL. $withDb = false — только сервер (для CREATE DATABASE).
- */
-function setup_connect($host, $port, $name, $user, $pass, $withDb)
+function setup_message($title, $bodyHtml)
 {
-    $dsn = 'mysql:host=' . $host;
-    if ($port !== '') {
-        $dsn .= ';port=' . (int)$port;
-    }
-    if ($withDb) {
-        $dsn .= ';dbname=' . $name;
-    }
-    $dsn .= ';charset=utf8mb4';
-
-    return new PDO($dsn, $user, $pass, array(
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ));
+    setup_header(true);
+    echo '<div class="msgbox"><div class="icon">' . setup_floppy_svg(58) . '</div><div>'
+        . '<h2>' . mokko_h($title) . '</h2>' . $bodyHtml . '</div></div>';
 }
 
 /**
- * Применяет setup/schema.sql и возвращает список таблиц.
+ * Безопасная запись PHP-файла.
+ */
+function write_php_file($path, $php)
+{
+    $tmp = $path . '.tmp';
+    if (@file_put_contents($tmp, $php, LOCK_EX) === false) { return false; }
+    if (!@rename($tmp, $path)) { @unlink($tmp); return false; }
+    @chmod($path, 0640);
+    return true;
+}
+
+/**
+ * Применяет setup/schema.sql, возвращает список таблиц.
  */
 function setup_apply_schema($pdo)
 {
@@ -345,7 +290,6 @@ function setup_apply_schema($pdo)
     if ($schema === false) {
         throw new RuntimeException('Не удалось прочитать setup/schema.sql.');
     }
-
     $schema = preg_replace('/^\s*--.*$/m', '', $schema);
     $statements = preg_split('/;\s*(?:\r\n|\r|\n)/', $schema);
     foreach ($statements as $statement) {
@@ -355,157 +299,168 @@ function setup_apply_schema($pdo)
         }
         $pdo->exec($statement);
     }
-
     return $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
 }
 
-if ($method === 'POST') {
-    foreach (array('db_host', 'db_port', 'db_name', 'db_user', 'admin_email', 'admin_name') as $k) {
-        if (isset($_POST[$k]) && is_string($_POST[$k])) {
-            $values[$k] = trim($_POST[$k]);
-        }
-    }
-    $dbPass     = isset($_POST['db_pass']) ? (string)$_POST['db_pass'] : '';
-    $adminPass  = isset($_POST['admin_pass']) ? (string)$_POST['admin_pass'] : '';
-    $adminPass2 = isset($_POST['admin_pass2']) ? (string)$_POST['admin_pass2'] : '';
-    $action     = isset($_POST['do']) ? (string)$_POST['do'] : 'check';
-
-    if (!mokko_is_same_origin()) {
-        $errors[] = 'Запрос пришёл с другого сайта — обновите страницу установщика.';
-    }
-    if (empty($_POST['token']) || !hash_equals($token, (string)$_POST['token'])) {
-        $errors[] = 'Сессия устарела — обновите страницу и заполните форму заново.';
-    }
-
-    if ($values['db_host'] === '' || !preg_match('/^[A-Za-z0-9._:\-\[\]]+$/', $values['db_host'])) {
-        $errors[] = 'Сервер MySQL — некорректное значение.';
-    }
-    if ($values['db_port'] !== '' && (!ctype_digit($values['db_port']) || (int)$values['db_port'] < 1 || (int)$values['db_port'] > 65535)) {
-        $errors[] = 'Порт MySQL — число от 1 до 65535 или пусто.';
-    }
-    if (!preg_match('/^[A-Za-z0-9_\-]+$/', $values['db_name'])) {
-        $errors[] = 'Имя базы данных — только латиница, цифры, «_» и «-».';
-    }
-    if ($values['db_user'] === '' || strlen($values['db_user']) > 64) {
-        $errors[] = 'Пользователь MySQL обязателен (до 64 символов).';
-    }
-    if (strlen($dbPass) > 256) {
-        $errors[] = 'Пароль MySQL слишком длинный.';
-    }
-
-    if ($action === 'install') {
-        if (!filter_var($values['admin_email'], FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'E-mail администратора указан неверно.';
-        }
-        if ($adminPass !== $adminPass2) {
-            $errors[] = 'Пароли администратора не совпадают.';
-        }
-        if (!mokko_password_ok($adminPass)) {
-            $errors[] = 'Пароль администратора — от 8 символов (и не длиннее 72 байт).';
-        }
-        if (!is_writable(dirname(__DIR__) . '/config')) {
-            $errors[] = 'Каталог config/ недоступен для записи — сохранить доступы к БД не получится.';
-        }
-    }
-
-    if (empty($errors)) {
-        try {
-            $server = setup_connect($values['db_host'], $values['db_port'], $values['db_name'], $values['db_user'], $dbPass, false);
-            $version = (string)$server->query('SELECT VERSION()')->fetchColumn();
-            $report[] = 'Подключение к MySQL успешно, версия ' . $version;
-
-            $stmt = $server->prepare('SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = ?');
-            $stmt->execute(array($values['db_name']));
-            $dbExists = (bool)$stmt->fetchColumn();
-
-            if ($dbExists) {
-                $db = setup_connect($values['db_host'], $values['db_port'], $values['db_name'], $values['db_user'], $dbPass, true);
-                $tables = $db->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-                $report[] = 'База «' . $values['db_name'] . '» найдена, таблиц: ' . count($tables);
-                if (in_array('users', $tables, true)) {
-                    $users = (int)$db->query('SELECT COUNT(*) FROM users')->fetchColumn();
-                    $report[] = 'Пользователей в базе: ' . $users;
-                }
-            } else {
-                if ($action === 'check') {
-                    $report[] = 'Базы «' . $values['db_name'] . '» пока нет — она будет создана при установке.';
-                }
-            }
-
-            if ($action === 'check') {
-                $report[] = 'Проверка пройдена. Теперь можно установить систему.';
-            } else {
-                if (!$dbExists) {
-                    $server->exec('CREATE DATABASE IF NOT EXISTS `' . $values['db_name'] . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
-                    $report[] = 'База «' . $values['db_name'] . '» создана.';
-                    $db = setup_connect($values['db_host'], $values['db_port'], $values['db_name'], $values['db_user'], $dbPass, true);
-                }
-
-                $tables = $db->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-                if (in_array('users', $tables, true) && (int)$db->query('SELECT COUNT(*) FROM users')->fetchColumn() > 0) {
-                    throw new RuntimeException('В этой базе уже есть пользователи — установка отменена, чтобы не затереть данные.');
-                }
-
-                $tables = setup_apply_schema($db);
-                foreach (array('users', 'places', 'staff', 'categories', 'items', 'lager', 'guests', 'checks', 'shifts', 'subscribers') as $table) {
-                    if (!in_array($table, $tables, true)) {
-                        throw new RuntimeException('Не создалась таблица ' . $table . '.');
-                    }
-                }
-                $report[] = 'Схема применена, таблиц: ' . count($tables);
-
-                $hash = password_hash($adminPass, PASSWORD_DEFAULT);
-                $ins  = $db->prepare("INSERT INTO users (email, password_hash, name, role, status) VALUES (?, ?, ?, 'admin', 'active')");
-                $ins->execute(array($values['admin_email'], $hash, mokko_str($values['admin_name'], 100)));
-                $adminId = (int)$db->lastInsertId();
-
-                $db->prepare('INSERT INTO places (user_id, name, address) VALUES (?, ?, ?)')
-                    ->execute(array($adminId, 'Главная кофейня', ''));
-                $report[] = 'Администратор ' . $values['admin_email'] . ' создан.';
-
-                $config = "<?php\n"
-                    . "// Создано установщиком " . date('Y-m-d H:i:s') . ". Файл содержит пароль БД — не коммитить.\n"
-                    . "return array(\n"
-                    . "    'host' => " . var_export($values['db_host'], true) . ",\n"
-                    . "    'port' => " . var_export($values['db_port'], true) . ",\n"
-                    . "    'name' => " . var_export($values['db_name'], true) . ",\n"
-                    . "    'user' => " . var_export($values['db_user'], true) . ",\n"
-                    . "    'pass' => " . var_export($dbPass, true) . ",\n"
-                    . ");\n";
-
-                if (@file_put_contents($localConfig, $config) === false) {
-                    throw new RuntimeException('Не удалось записать config/db.local.php. Создайте файл вручную по образцу.');
-                }
-                $report[] = 'Доступы к БД сохранены в config/db.local.php.';
-                $done = true;
-            }
-        } catch (Exception $e) {
-            mokko_log('install: ' . $e->getMessage());
-            $errors[] = 'Ошибка: ' . $e->getMessage();
-        }
-    }
-}
-
-// ── Вывод ───────────────────────────────────────────────────────────────────
-
-if ($done) {
-    setup_header('MOKKO CRM — установка завершена', true);
-    echo '<div class="msgbox"><div class="icon">' . setup_floppy_svg(58) . '</div><div>'
-        . '<h2>Установка завершена</h2>'
-        . '<p>Система готова к работе. Войдите под созданным администратором:</p>'
-        . '<ul>';
-    foreach ($report as $line) {
-        echo '<li>' . mokko_h($line) . '</li>';
-    }
-    echo '</ul>'
-        . '<p><a class="btn" href="' . mokko_h($loginUrl) . '">Перейти к входу</a></p>'
-        . '<p class="warn"><b>Удалите папку setup/</b> — после установки она не нужна.</p>'
-        . '</div></div>';
-    setup_footer('Установка завершена');
+/* ── 1. Уже установлено? ────────────────────────────────────────────────── */
+if (is_file($LOCK_FILE)) {
+    setup_message('Установка уже выполнена', '<p>MOKKO CRM уже установлена на этом сервере. Повторный запуск установщика заблокирован.</p>'
+        . '<p><a class="btn" href="../login">Перейти к входу</a></p>'
+        . '<p class="warn"><b>Удалите папку setup/ с сервера.</b></p>');
+    setup_footer('Готово');
     exit;
 }
 
-setup_header('MOKKO CRM — установка');
+/* ── 2. Ключ установки ──────────────────────────────────────────────────── */
+$installKey = '';
+if (is_file($KEY_FILE)) {
+    $loaded = include $KEY_FILE;
+    if (is_string($loaded)) { $installKey = trim($loaded); }
+}
+
+if ($installKey === '') {
+    $newKey = bin2hex(random_bytes(16));
+    $ok = write_php_file($KEY_FILE, "<?php\n// Ключ установки MOKKO CRM. Передайте его вместе с копией.\nreturn '" . $newKey . "';\n");
+    if ($ok) {
+        setup_message('Создан ключ установки', '<p>Откройте файл <code>setup/install.key</code> по FTP или в файловом менеджере хостинга, скопируйте ключ и обновите страницу — установщик попросит его ввести.</p>'
+            . '<p class="hint">Ключ не показывается на экране, чтобы его не увидел случайный посетитель.</p>');
+    } else {
+        setup_message('Не удалось создать ключ', '<p class="err">Не удалось записать файл <code>setup/install.key</code>. Дайте права на запись папке setup/ (chmod 755) и обновите страницу.</p>');
+    }
+    setup_footer('Ожидание ключа');
+    exit;
+}
+
+/* ── 3. Обработка формы ─────────────────────────────────────────────────── */
+$errors = array();
+$in = array(
+    'db_host'     => 'localhost',
+    'db_name'     => 'mokko',
+    'db_user'     => 'root',
+    'db_pass'     => '',
+    'admin_email' => '',
+    'admin_pass'  => '',
+    'token'       => '',
+);
+$generatedPass = '';
+$domain = preg_replace('/:\d+$/', '', mokko_host());
+$adminEmail = '';
+$adminPass = '';
+
+if ($isPost) {
+    foreach ($in as $k => $def) {
+        $in[$k] = isset($_POST[$k]) ? trim((string)$_POST[$k]) : $def;
+    }
+
+    if (!hash_equals($installKey, $in['token'])) {
+        $errors[] = 'Неверный ключ установки. Он указан в файле setup/install.key и в вашей лицензии.';
+    }
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $in['db_name'])) {
+        $errors[] = 'Имя базы данных: только латинские буквы, цифры и подчёркивание.';
+    }
+    if ($in['db_host'] === '') { $in['db_host'] = 'localhost'; }
+    if ($in['db_user'] === '') { $errors[] = 'Укажите пользователя базы данных.'; }
+
+    if ($in['admin_pass'] === '') {
+        $generatedPass = bin2hex(random_bytes(6));
+    } elseif (strlen($in['admin_pass']) < 8 || strlen($in['admin_pass']) > 72) {
+        $errors[] = 'Пароль администратора — от 8 до 72 символов (или оставьте поле пустым, чтобы сгенерировать).';
+    }
+    $adminEmail = $in['admin_email'] !== '' ? $in['admin_email'] : 'admin@mokko.local';
+    if (strlen($adminEmail) > 254) { $errors[] = 'Слишком длинный e-mail администратора.'; }
+
+    $pdo = null;
+    if (!$errors) {
+        try {
+            $pdo = new PDO(
+                'mysql:host=' . $in['db_host'] . ';charset=utf8mb4',
+                $in['db_user'],
+                $in['db_pass'],
+                array(
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                )
+            );
+        } catch (Exception $e) {
+            mokko_log('install: connect failed: ' . $e->getMessage());
+            $errors[] = 'Не удалось подключиться к MySQL с этими данными. Проверьте хост, пользователя и пароль.';
+        }
+    }
+
+    if (!$errors && $pdo instanceof PDO) {
+        try {
+            $adminPass = $generatedPass !== '' ? $generatedPass : $in['admin_pass'];
+
+            $pdo->exec('CREATE DATABASE IF NOT EXISTS `' . $in['db_name'] . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+            $pdo->exec('USE `' . $in['db_name'] . '`');
+
+            $tables = setup_apply_schema($pdo);
+            foreach (array('users', 'places', 'staff', 'categories', 'items', 'lager', 'guests', 'checks', 'shifts', 'subscribers') as $table) {
+                if (!in_array($table, $tables, true)) {
+                    throw new RuntimeException('Не создалась таблица ' . $table . '.');
+                }
+            }
+
+            $has = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+            if ($has === 0) {
+                $hash = password_hash($adminPass, PASSWORD_DEFAULT);
+                $ins = $pdo->prepare("INSERT INTO users (email, password_hash, name, role, status) VALUES (?, ?, ?, 'admin', 'active')");
+                $ins->execute(array($adminEmail, $hash, 'Администратор'));
+                $adminId = (int)$pdo->lastInsertId();
+                $pdo->prepare('INSERT INTO places (user_id, name) VALUES (?, ?)')->execute(array($adminId, 'Моя кофейня'));
+            }
+
+            $dbPhp = "<?php\n// Создано установщиком MOKKO CRM. Доступы к базе данных.\nreturn array(\n"
+                   . "    'host' => " . var_export($in['db_host'], true) . ",\n"
+                   . "    'name' => " . var_export($in['db_name'], true) . ",\n"
+                   . "    'user' => " . var_export($in['db_user'], true) . ",\n"
+                   . "    'pass' => " . var_export($in['db_pass'], true) . ",\n"
+                   . ");\n";
+            if (!write_php_file($DBCONF_FILE, $dbPhp)) {
+                throw new RuntimeException('Не удалось записать config/db_local.php. Дайте права на запись папке config/.');
+            }
+        } catch (Exception $e) {
+            mokko_log('install: schema failed: ' . $e->getMessage());
+            $errors[] = 'Ошибка при создании таблиц: ' . $e->getMessage();
+        }
+    }
+
+    if (!$errors) {
+        $issued = date('c');
+        $signature = hash_hmac('sha256', $domain . '|' . $issued, $installKey);
+        $licPhp = "<?php\n// Лицензия MOKKO CRM. Копия привязана к домену установки.\nreturn array(\n"
+                . "    'domain'    => " . var_export($domain, true) . ",\n"
+                . "    'issued_at' => " . var_export($issued, true) . ",\n"
+                . "    'key'       => " . var_export(substr($installKey, 0, 8) . '…', true) . ",\n"
+                . "    'signature' => " . var_export($signature, true) . ",\n"
+                . ");\n";
+        write_php_file($LICENSE_FILE, $licPhp);
+        write_php_file($LOCK_FILE, "<?php\n// Установка выполнена " . date('c') . ". Удалите папку setup/.\nreturn true;\n");
+
+        $basePath = rtrim(str_replace('\\', '/', dirname(dirname(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '/'))), '/');
+        $loginUrl = (mokko_is_https() ? 'https' : 'http') . '://' . mokko_host() . $basePath . '/login';
+
+        $body = '<p>Копия привязана к домену <b>' . mokko_h($domain) . '</b>.</p>'
+            . '<h3>Данные для входа</h3><pre>'
+            . 'Адрес:  ' . mokko_h($loginUrl) . "\n"
+            . 'E-mail: ' . mokko_h($adminEmail) . "\n"
+            . 'Пароль: ' . mokko_h($adminPass) . "\n"
+            . '</pre>';
+        if ($generatedPass !== '') {
+            $body .= '<p class="err">Пароль сгенерирован автоматически — сохраните его и смените после входа.</p>';
+        }
+        $body .= '<p><a class="btn" href="../login">Перейти к входу</a></p>'
+            . '<p class="warn"><b>Теперь удалите папку setup/ с сервера.</b></p>';
+
+        setup_message('Установка завершена', $body);
+        setup_footer('Установка завершена');
+        exit;
+    }
+}
+
+/* ── 4. Форма установки ─────────────────────────────────────────────────── */
+setup_header();
 ?>
 
 <div class="side">
@@ -514,8 +469,8 @@ setup_header('MOKKO CRM — установка');
 
     <ol class="steps">
         <li class="on"><b>1</b><span>Сервер и база</span></li>
-        <li><b>2</b><span>Проверка связи</span></li>
-        <li><b>3</b><span>Администратор</span></li>
+        <li><b>2</b><span>Администратор</span></li>
+        <li><b>3</b><span>Ключ установки</span></li>
         <li><b>4</b><span>Готово</span></li>
     </ol>
     <div class="seg"><i class="on"></i><i></i><i></i><i></i></div>
@@ -524,50 +479,38 @@ setup_header('MOKKO CRM — установка');
 <div class="main">
     <?php if ($errors): ?>
         <div class="status">
-            <?php foreach ($errors as $e): ?>
-                <div class="line err">✗ <?= mokko_h($e) ?></div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if ($report): ?>
-        <div class="status">
-            <?php foreach ($report as $line): ?>
-                <div class="line ok">✓ <?= mokko_h($line) ?></div>
+            <?php foreach ($errors as $msg): ?>
+                <div class="line err">✗ <?= mokko_h($msg) ?></div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
 
     <form method="post" action="">
-        <input type="hidden" name="token" value="<?= mokko_h($token) ?>">
-
         <div class="group">
-            <div class="group-title">1. Сервер и база данных</div>
+            <div class="group-title">1. База данных MySQL</div>
 
             <div class="row">
                 <div>
-                    <label class="first" for="db_host">Сервер MySQL</label>
-                    <input id="db_host" type="text" name="db_host" value="<?= mokko_h($values['db_host']) ?>" required>
-                    <div class="hint">Обычно <code>localhost</code> или адрес из панели хостинга</div>
+                    <label class="first" for="db_host">Хост</label>
+                    <input id="db_host" type="text" name="db_host" value="<?= mokko_h($in['db_host']) ?>" autocomplete="off">
+                    <div class="hint">Обычно <code>localhost</code>; у некоторых хостингов — отдельный адрес из панели.</div>
                 </div>
-                <div class="narrow">
-                    <label class="first" for="db_port">Порт</label>
-                    <input id="db_port" type="text" name="db_port" value="<?= mokko_h($values['db_port']) ?>">
+                <div>
+                    <label class="first" for="db_name">Имя базы</label>
+                    <input id="db_name" type="text" name="db_name" value="<?= mokko_h($in['db_name']) ?>" autocomplete="off">
+                    <div class="hint">Создастся, если её нет. Латиница, цифры и «_».</div>
                 </div>
             </div>
-
-            <label for="db_name">Имя базы</label>
-            <input id="db_name" type="text" name="db_name" value="<?= mokko_h($values['db_name']) ?>" required>
-            <div class="hint">Если базы нет, установщик попробует создать её (нужно право CREATE).</div>
 
             <div class="row">
                 <div>
                     <label for="db_user">Пользователь</label>
-                    <input id="db_user" type="text" name="db_user" value="<?= mokko_h($values['db_user']) ?>" required>
+                    <input id="db_user" type="text" name="db_user" value="<?= mokko_h($in['db_user']) ?>" autocomplete="off">
                 </div>
                 <div>
-                    <label for="db_pass">Пароль</label>
+                    <label for="db_pass">Пароль базы</label>
                     <input id="db_pass" type="password" name="db_pass" value="" autocomplete="off">
+                    <div class="hint">На локальном XAMPP обычно пустой.</div>
                 </div>
             </div>
         </div>
@@ -577,73 +520,69 @@ setup_header('MOKKO CRM — установка');
 
             <div class="row">
                 <div>
-                    <label class="first" for="admin_email">E-mail (он же логин)</label>
-                    <input id="admin_email" type="text" name="admin_email" value="<?= mokko_h($values['admin_email']) ?>" required>
+                    <label class="first" for="admin_email">E-mail для входа</label>
+                    <input id="admin_email" type="text" name="admin_email" value="<?= mokko_h($in['admin_email']) ?>" autocomplete="off">
+                    <div class="hint">Пусто — <code>admin@mokko.local</code>.</div>
                 </div>
                 <div>
-                    <label class="first" for="admin_name">Имя</label>
-                    <input id="admin_name" type="text" name="admin_name" value="<?= mokko_h($values['admin_name']) ?>" maxlength="100">
-                </div>
-            </div>
-
-            <div class="row">
-                <div>
-                    <label for="admin_pass">Пароль</label>
-                    <input id="admin_pass" type="password" name="admin_pass" value="" autocomplete="new-password" required>
-                    <div class="hint">От 8 символов</div>
-                </div>
-                <div>
-                    <label for="admin_pass2">Повтор пароля</label>
-                    <input id="admin_pass2" type="password" name="admin_pass2" value="" autocomplete="new-password" required>
+                    <label class="first" for="admin_pass">Пароль</label>
+                    <input id="admin_pass" type="password" name="admin_pass" value="" autocomplete="new-password">
+                    <div class="hint">От 8 символов. Пусто — сгенерируем и покажем один раз.</div>
                 </div>
             </div>
         </div>
 
+        <div class="group">
+            <div class="group-title">3. Ключ установки</div>
+            <label class="first" for="token">Ключ из лицензии</label>
+            <input id="token" type="text" name="token" value="<?= mokko_h($in['token']) ?>" autocomplete="off">
+            <div class="hint">Указан в файле <code>setup/install.key</code> и передаётся вместе с копией.</div>
+        </div>
+
         <div class="actions">
-            <button type="submit" name="do" value="check">Проверить подключение</button>
-            <button type="submit" name="do" value="install" class="primary">Установить</button>
+            <button type="submit" class="primary">Установить</button>
         </div>
     </form>
 </div>
 
 <div class="gallery-block">
-        <div class="gallery-title">Как выглядит система</div>
-        <div class="gallery">
-            <a class="shot" href="../images/screens/01-login.png" data-full="../images/screens/01-login.png">
-                <img src="../images/screens/01-login-thumb.png" alt="Экран входа" loading="lazy">
-                <span>Вход</span>
-            </a>
-            <a class="shot" href="../images/screens/06-cashier.png" data-full="../images/screens/06-cashier.png">
-                <img src="../images/screens/06-cashier-thumb.png" alt="Касса: заказ" loading="lazy">
-                <span>Касса</span>
-            </a>
-            <a class="shot" href="../images/screens/08-bill.png" data-full="../images/screens/08-bill.png">
-                <img src="../images/screens/08-bill-thumb.png" alt="Открытый счёт гостя" loading="lazy">
-                <span>Открытый счёт</span>
-            </a>
-            <a class="shot" href="../images/screens/07-guests.png" data-full="../images/screens/07-guests.png">
-                <img src="../images/screens/07-guests-thumb.png" alt="Открытые счета" loading="lazy">
-                <span>Гости</span>
-            </a>
-            <a class="shot" href="../images/screens/03-menu.png" data-full="../images/screens/03-menu.png">
-                <img src="../images/screens/03-menu-thumb.png" alt="Меню и цены" loading="lazy">
-                <span>Меню</span>
-            </a>
-            <a class="shot" href="../images/screens/04-lager.png" data-full="../images/screens/04-lager.png">
-                <img src="../images/screens/04-lager-thumb.png" alt="Склад" loading="lazy">
-                <span>Склад</span>
-            </a>
-            <a class="shot" href="../images/screens/05-staff.png" data-full="../images/screens/05-staff.png">
-                <img src="../images/screens/05-staff-thumb.png" alt="Сотрудники" loading="lazy">
-                <span>Сотрудники</span>
-            </a>
-            <a class="shot" href="../images/screens/02-places.png" data-full="../images/screens/02-places.png">
-                <img src="../images/screens/02-places-thumb.png" alt="Кофейни" loading="lazy">
-                <span>Кофейни</span>
-            </a>
-        </div>
-        <div class="hint">Нажмите на превью, чтобы открыть скриншот целиком.</div>
+    <div class="gallery-title">Как выглядит система</div>
+    <div class="gallery">
+        <a class="shot" href="../images/screens/01-login.png" data-full="../images/screens/01-login.png">
+            <img src="../images/screens/01-login-thumb.png" alt="Экран входа" loading="lazy">
+            <span>Вход</span>
+        </a>
+        <a class="shot" href="../images/screens/06-cashier.png" data-full="../images/screens/06-cashier.png">
+            <img src="../images/screens/06-cashier-thumb.png" alt="Касса: заказ" loading="lazy">
+            <span>Касса</span>
+        </a>
+        <a class="shot" href="../images/screens/08-bill.png" data-full="../images/screens/08-bill.png">
+            <img src="../images/screens/08-bill-thumb.png" alt="Открытый счёт гостя" loading="lazy">
+            <span>Открытый счёт</span>
+        </a>
+        <a class="shot" href="../images/screens/07-guests.png" data-full="../images/screens/07-guests.png">
+            <img src="../images/screens/07-guests-thumb.png" alt="Открытые счета" loading="lazy">
+            <span>Гости</span>
+        </a>
+        <a class="shot" href="../images/screens/03-menu.png" data-full="../images/screens/03-menu.png">
+            <img src="../images/screens/03-menu-thumb.png" alt="Меню и цены" loading="lazy">
+            <span>Меню</span>
+        </a>
+        <a class="shot" href="../images/screens/04-lager.png" data-full="../images/screens/04-lager.png">
+            <img src="../images/screens/04-lager-thumb.png" alt="Склад" loading="lazy">
+            <span>Склад</span>
+        </a>
+        <a class="shot" href="../images/screens/05-staff.png" data-full="../images/screens/05-staff.png">
+            <img src="../images/screens/05-staff-thumb.png" alt="Сотрудники" loading="lazy">
+            <span>Сотрудники</span>
+        </a>
+        <a class="shot" href="../images/screens/02-places.png" data-full="../images/screens/02-places.png">
+            <img src="../images/screens/02-places-thumb.png" alt="Кофейни" loading="lazy">
+            <span>Кофейни</span>
+        </a>
     </div>
+    <div class="hint">Нажмите на превью, чтобы открыть скриншот целиком.</div>
+</div>
 
 <div class="lightbox" id="lightbox" hidden>
     <img src="" alt="">
@@ -680,4 +619,4 @@ setup_header('MOKKO CRM — установка');
 </script>
 
 <?php
-setup_footer('Заполните поля и нажмите «Проверить подключение»');
+setup_footer('Заполните данные и нажмите «Установить»');

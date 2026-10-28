@@ -1,7 +1,5 @@
-# Запрет прямого HTTP-доступа к конфигурации.
-<IfModule mod_authz_core.c>
-    Require all denied
-</IfModule>
+# Файлы конфигурации подключаются из PHP и не должны отдаваться напрямую
+Require all denied
 <IfModule !mod_authz_core.c>
     Order allow,deny
     Deny from all
