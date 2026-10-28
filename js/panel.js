@@ -329,7 +329,11 @@ function staffForm(formId, s) {
     '</div>';
 }
 function staffDialogDone(dlg) { if (dlg && typeof dlg.close === 'function') { dlg.close(); } else { $('.jconfirm').remove(); } }
-var staffServerErrors = { 'password must be 8-72 characters': ['pass', 'Пароль — от 8 до 72 символов.'] };
+var staffServerErrors = {
+    'password must be 8-72 characters': ['pass', 'Пароль — от 8 до 72 символов.'],
+    'invalid email': ['login', 'Укажите корректный e-mail — он же логин сотрудника.'],
+    'email already used': ['login', 'Этот e-mail уже занят другим аккаунтом.']
+};
 function staffSave(mode, dlg, $f, id) {
     var v = function (n) { return $.trim($f.find('input[name="' + n + '"]').val() || ''); };
     var d = { name: v('name'), lastname: v('lastname'), login: v('login'), phone: v('phone'), rate: v('rate').replace(',', '.') };
@@ -341,6 +345,7 @@ function staffSave(mode, dlg, $f, id) {
     if (d.rate && !(Number(d.rate) >= 0)) { return bad('rate', 'Ставка — число, например 250.'); }
     if (!d.login) { return bad('login', 'Укажите логин — с ним сотрудник входит в кассу.'); }
     if (/\s/.test(d.login)) { return bad('login', 'В логине не должно быть пробелов.'); }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.login)) { return bad('login', 'Логин должен быть e-mail, например ilya@example.com.'); }
     if (d.phone) { d.phone = (d.phone.charAt(0) === '+' ? '+' : '') + digits; if (/^8\d{10}$/.test(d.phone)) { d.phone = '+7' + d.phone.substr(1); } }
     var payload = $.extend({ uid: uid, sid: sid, key: key }, d, { rate: d.rate || '0' });
     if (mode === 'new') {

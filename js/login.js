@@ -83,6 +83,12 @@ $(document).ready(function($) {
                 var text;
                 if (jqXHR.status === 0)           text = 'Нет соединения с сервером<br/><br/>';
                 else if (exception === 'timeout')  text = 'Превышено время ожидания<br/><br/>';
+                else if (jqXHR.status === 429) {
+                    var retry = (jqXHR.responseJSON && jqXHR.responseJSON.retry_after) ? parseInt(jqXHR.responseJSON.retry_after, 10) : 0;
+                    text = 'Слишком много попыток входа.<br/>' + (retry > 0
+                        ? 'Повторите через ' + Math.max(1, Math.ceil(retry / 60)) + ' мин.<br/><br/>'
+                        : 'Попробуйте позже.<br/><br/>');
+                }
                 else if (jqXHR.status === 500)     text = 'Ошибка сервера (500)<br/><br/>';
                 else                               text = 'Ошибка: ' + jqXHR.status + ' ' + jqXHR.responseText;
                 $('.report').empty().append(text);

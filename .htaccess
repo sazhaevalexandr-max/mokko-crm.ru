@@ -39,6 +39,13 @@ DirectoryIndex index.php index.html
 RewriteEngine On
 RewriteBase /mokko-crm.ru
 
+# Служебные каталоги VCS не отдаём ни при каких условиях.
+# FilesMatch ниже их не закрывает: у файла .git/config базовое имя — «config»,
+# поэтому правило ^\. не срабатывает, и репозиторий выкладывается целиком.
+# Правило стоит до «Skip rewriting for existing files», иначе существующий
+# файл .git/config ушёл бы в отдачу статикой.
+RewriteRule (^|/)\.(git|svn|hg|bzr)(/|$) - [NC,R=404,L]
+
 # Remove trailing slashes (skip directories)
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} ^(.+)/$

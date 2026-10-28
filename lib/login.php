@@ -17,7 +17,7 @@
 <script src="<?= mokko_h(BASE_PATH) ?>/js/bootstrap-4.6.2.bundle.min.js"></script>
 <script src="<?= mokko_h(BASE_PATH) ?>/js/jquery-ui.js"></script>
 <script>var BASE_URL = <?= mokko_js(BASE_URL) ?>;</script>
-<script src="<?= mokko_h(BASE_PATH) ?>/js/login.js?v=4"></script>
+<script src="<?= mokko_h(BASE_PATH) ?>/js/login.js?v=5"></script>
 </head>
 <body class="auth-body">
 <div class="auth-shell">

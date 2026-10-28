@@ -52,9 +52,11 @@ function handleLogin()
         mokko_json(array('error' => 'invalid'));
     }
 
-    if (!mokko_rate_limit('login', 10, 300)) {
-        mokko_json(array('error' => 'limit'));
-    }
+    // Два независимых лимита: на IP (выше, чтобы не блокировать офис за NAT)
+    // и на конкретный логин (ниже и дольше — против распределённого подбора).
+    mokko_rate_limit_guard('login_ip', 30, 300);
+    $loginKey = 'login_' . substr(hash('sha256', function_exists('mb_strtolower') ? mb_strtolower($login, 'UTF-8') : strtolower($login)), 0, 24);
+    mokko_rate_limit_guard($loginKey, 10, 900);
 
     try {
         $pdo  = getDB();
@@ -90,13 +92,16 @@ function handleLogin()
     if ($staff && $ok) {
         if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
             try {
+                $newHash = password_hash($password, PASSWORD_DEFAULT);
                 $pdo->prepare('UPDATE staff SET password_hash = ? WHERE id = ?')
-                    ->execute(array(password_hash($password, PASSWORD_DEFAULT), (int)$staff['id']));
+                    ->execute(array($newHash, (int)$staff['id']));
+                $hash = $newHash;
             } catch (Exception $e) {
                 mokko_log('login: staff rehash failed: ' . $e->getMessage());
             }
         }
-        mokko_rate_limit_clear('login');
+        mokko_rate_limit_clear('login_ip');
+        mokko_rate_limit_clear($loginKey);
         session_regenerate_id(true);
         $_SESSION = array();
         $_SESSION['key']        = bin2hex(random_bytes(16));
@@ -104,6 +109,8 @@ function handleLogin()
         $_SESSION['sid']        = 'staff';
         $_SESSION['staff_id']   = (int)$staff['id'];
         $_SESSION['issued']     = time();
+        $_SESSION['last_seen']  = time();
+        $_SESSION['pv']         = mokko_password_fingerprint($hash);
         mokko_json(array('success' => true, 'sid' => 'staff'));
     }
 
@@ -115,14 +122,17 @@ function handleLogin()
     // Прозрачное обновление хеша при смене алгоритма/стоимости.
     if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
         try {
+            $newHash = password_hash($password, PASSWORD_DEFAULT);
             $upd = $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
-            $upd->execute(array(password_hash($password, PASSWORD_DEFAULT), (int)$user['id']));
+            $upd->execute(array($newHash, (int)$user['id']));
+            $hash = $newHash;
         } catch (Exception $e) {
             mokko_log('login: rehash failed: ' . $e->getMessage());
         }
     }
 
-    mokko_rate_limit_clear('login');
+    mokko_rate_limit_clear('login_ip');
+    mokko_rate_limit_clear($loginKey);
 
     // Защита от session fixation.
     session_regenerate_id(true);
@@ -131,6 +141,8 @@ function handleLogin()
     $_SESSION['uid']    = (int)$user['id'];
     $_SESSION['sid']    = ($user['role'] === 'admin') ? 'uid' : 'staff';
     $_SESSION['issued'] = time();
+    $_SESSION['last_seen'] = time();
+    $_SESSION['pv']        = mokko_password_fingerprint($hash);
 
     mokko_json(array('success' => true, 'sid' => $_SESSION['sid']));
 }
@@ -156,9 +168,7 @@ function handleRegister()
         mokko_json(array('error' => 'password must be 8-72 characters'));
     }
 
-    if (!mokko_rate_limit('register', 5, 3600)) {
-        mokko_json(array('error' => 'limit'));
-    }
+    mokko_rate_limit_guard('register', 5, 3600);
 
     try {
         $pdo = getDB();

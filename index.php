@@ -22,6 +22,13 @@ define('BASE_PATH', $base);
 define('BASE_URL', (mokko_is_https() ? 'https' : 'http') . '://' . mokko_host() . $base);
 unset($base);
 
+// Система ещё не установлена (нет базы, таблиц или пользователей) —
+// не показываем интерфейс с ошибками БД, а сразу ведём в установщик.
+if (!mokko_is_installed()) {
+    header('Location: ' . BASE_URL . '/setup/install.php');
+    exit;
+}
+
 /**
  * Нормализация пользовательской строки.
  * ВАЖНО: для SQL всегда используются prepared statements, эта функция
@@ -99,8 +106,16 @@ if ($view !== '') {
                 exit;
             }
             if (isset($_GET['place'])) {
-                $_SESSION['place'] = (int)$_GET['place'];
-                header('Location: ' . BASE_URL . '/crm');
+                $place = (int)$_GET['place'];
+                require_once __DIR__ . '/config/db.php';
+                // Кофейня должна принадлежать текущему пользователю: иначе
+                // ?place=1 переключал интерфейс на чужую точку.
+                $chk = getDB()->prepare('SELECT id FROM places WHERE id = ? AND user_id = ? LIMIT 1');
+                $chk->execute(array($place, (int)$_SESSION['uid']));
+                if ($chk->fetchColumn()) {
+                    $_SESSION['place'] = $place;
+                }
+                header('Location: ' . BASE_URL . (!empty($_SESSION['place']) ? '/crm' : '/enter'));
                 exit;
             }
             mokko_render('select_place');

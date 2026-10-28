@@ -14,6 +14,10 @@ if (defined('MOKKO_SECURITY')) {
 }
 define('MOKKO_SECURITY', 1);
 
+/** Время жизни сессии: 30 минут бездействия и 12 часов всего. */
+define('MOKKO_SESSION_IDLE', 1800);
+define('MOKKO_SESSION_MAX', 43200);
+
 /**
  * Скрываем подробные ошибки от пользователя, пишем их в лог.
  */
@@ -98,6 +102,38 @@ function mokko_session_start()
     }
 
     session_start();
+
+    // Абсолютный и idle-таймауты сессии + отметка активности.
+    mokko_session_guard();
+}
+
+/**
+ * Завершает сессию по абсолютному (12 ч) или idle-таймауту (30 мин).
+ * Вызывается после session_start() на каждом запросе, чтобы «вечная»
+ * украденная cookie не жила месяцами.
+ */
+function mokko_session_guard()
+{
+    if (empty($_SESSION['uid']) || empty($_SESSION['key'])) {
+        return;
+    }
+
+    $now    = time();
+    $issued = isset($_SESSION['issued']) ? (int)$_SESSION['issued'] : 0;
+    $seen   = isset($_SESSION['last_seen']) ? (int)$_SESSION['last_seen'] : $issued;
+
+    $expired = ($issued > 0 && ($now - $issued) > MOKKO_SESSION_MAX)
+        || ($seen > 0 && ($now - $seen) > MOKKO_SESSION_IDLE);
+
+    if ($expired) {
+        $_SESSION = array();
+        if (!headers_sent()) {
+            session_regenerate_id(true);
+        }
+        return;
+    }
+
+    $_SESSION['last_seen'] = $now;
 }
 
 /**
@@ -237,6 +273,32 @@ function mokko_is_authenticated()
 }
 
 /**
+ * Установлена ли система: база доступна и в ней есть хотя бы один пользователь.
+ * Используется фронт-контроллером, чтобы до установки не показывать
+ * полупустой интерфейс с ошибками БД, а сразу вести в setup/install.php.
+ */
+function mokko_is_installed()
+{
+    static $installed = null;
+    if ($installed !== null) {
+        return $installed;
+    }
+
+    $installed = false;
+    try {
+        require_once __DIR__ . '/db.php';
+        $pdo = getDB();
+        $installed = ((int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn()) > 0;
+    } catch (Exception $e) {
+        $installed = false;
+    } catch (Throwable $e) {
+        $installed = false;
+    }
+
+    return $installed;
+}
+
+/**
  * Требуем авторизованную сессию, возвращаем id пользователя.
  */
 function mokko_require_auth()
@@ -248,36 +310,68 @@ function mokko_require_auth()
 }
 
 /**
- * Простое ограничение частоты запросов (per-IP, файловый бакет).
- * Возвращает true, если запрос разрешён.
+ * Каталог для файловых счётчиков. Если временный каталог недоступен,
+ * используется storage/rate-limit внутри проекта: защита не должна
+ * молча отключаться из-за прав на /tmp.
  */
-function mokko_rate_limit($bucket, $max, $window)
+function mokko_rate_limit_dir()
+{
+    static $dir = null;
+    if ($dir !== null) {
+        return $dir;
+    }
+
+    $candidates = array(
+        rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'mokko-rate-limit',
+        dirname(__DIR__) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'rate-limit',
+    );
+
+    foreach ($candidates as $candidate) {
+        if (!is_dir($candidate)) {
+            @mkdir($candidate, 0700, true);
+        }
+        if (is_dir($candidate) && is_writable($candidate)) {
+            $dir = $candidate;
+            return $dir;
+        }
+    }
+
+    mokko_log('rate-limit: no writable directory');
+    $dir = false;
+    return $dir;
+}
+
+/**
+ * Учёт попытки. Возвращает array(allowed, retry, count).
+ * Если счётчик недоступен, запрос отклоняется (fail-closed), а не
+ * пропускается молча.
+ */
+function mokko_rate_limit_info($bucket, $max, $window)
 {
     $bucket = preg_replace('/[^a-z0-9_\-]/i', '', (string)$bucket);
     if ($bucket === '') {
-        return true;
+        return array('allowed' => true, 'retry' => 0, 'count' => 0);
     }
 
-    $ip  = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-    $dir = rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'mokko-rate-limit';
-
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0700, true);
-    }
-    if (!is_dir($dir)) {
-        return true; // не ломаем вход, если нет доступа к каталогу
+    $dir = mokko_rate_limit_dir();
+    if ($dir === false) {
+        return array('allowed' => false, 'retry' => 60, 'count' => 0);
     }
 
+    $ip   = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '0.0.0.0';
     $file = $dir . DIRECTORY_SEPARATOR . $bucket . '-' . hash('sha256', $bucket . '|' . $ip) . '.json';
     $fp   = @fopen($file, 'c+');
     if (!$fp) {
-        return true;
+        mokko_log('rate-limit: cannot open bucket ' . $bucket);
+        return array('allowed' => false, 'retry' => 60, 'count' => 0);
     }
 
     $allowed = true;
+    $retry   = 0;
+    $count   = 0;
+
     if (@flock($fp, LOCK_EX)) {
-        $raw  = stream_get_contents($fp);
-        $data = json_decode((string)$raw, true);
+        $data = json_decode((string)stream_get_contents($fp), true);
         $now  = time();
 
         if (!is_array($data) || empty($data['start']) || ($now - (int)$data['start']) > $window) {
@@ -285,7 +379,9 @@ function mokko_rate_limit($bucket, $max, $window)
         }
 
         $data['count'] = (int)$data['count'] + 1;
-        $allowed = $data['count'] <= $max;
+        $count   = $data['count'];
+        $allowed = $count <= $max;
+        $retry   = max(0, ((int)$data['start'] + $window) - $now);
 
         ftruncate($fp, 0);
         rewind($fp);
@@ -295,7 +391,44 @@ function mokko_rate_limit($bucket, $max, $window)
     }
     fclose($fp);
 
-    return $allowed;
+    // Изредка чистим старые бакеты, иначе каталог растёт бесконечно.
+    if (mt_rand(1, 200) === 1) {
+        foreach ((array)glob($dir . DIRECTORY_SEPARATOR . '*.json') as $old) {
+            if (@filemtime($old) < time() - 7200) {
+                @unlink($old);
+            }
+        }
+    }
+
+    return array('allowed' => $allowed, 'retry' => $retry, 'count' => $count);
+}
+
+/**
+ * Совместимость: true, если запрос разрешён.
+ */
+function mokko_rate_limit($bucket, $max, $window)
+{
+    $info = mokko_rate_limit_info($bucket, $max, $window);
+    return $info['allowed'];
+}
+
+/**
+ * Проверка лимита с немедленным ответом 429 и заголовком Retry-After.
+ */
+function mokko_rate_limit_guard($bucket, $max, $window)
+{
+    $info = mokko_rate_limit_info($bucket, $max, $window);
+    if (!$info['allowed']) {
+        $retry = max(1, (int)$info['retry']);
+        if (!headers_sent()) {
+            header('Retry-After: ' . $retry);
+        }
+        mokko_json(array(
+            'error'       => 'limit',
+            'retry_after' => $retry,
+        ), 429);
+    }
+    return $info;
 }
 
 /**
@@ -307,8 +440,11 @@ function mokko_rate_limit_clear($bucket)
     if ($bucket === '') {
         return;
     }
-    $ip  = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-    $dir = rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'mokko-rate-limit';
+    $dir = mokko_rate_limit_dir();
+    if ($dir === false) {
+        return;
+    }
+    $ip   = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '0.0.0.0';
     $file = $dir . DIRECTORY_SEPARATOR . $bucket . '-' . hash('sha256', $bucket . '|' . $ip) . '.json';
     if (is_file($file)) {
         @unlink($file);
@@ -356,10 +492,26 @@ function mokko_str($value, $maxLength = 255)
 }
 
 /**
- * Проверка минимальной длины пароля (в байтах, bcrypt limit = 72).
+ * Проверка пароля: не короче 8 СИМВОЛОВ (а не байт) и не длиннее 72 байт
+ * (ограничение bcrypt). Кириллица в UTF-8 занимает 2 байта на символ,
+ * поэтому strlen() пропускал пароли из 4–7 символов.
  */
 function mokko_password_ok($password)
 {
-    $length = strlen((string)$password);
-    return $length >= 8 && $length <= 72;
+    $password = (string)$password;
+    $bytes = strlen($password);
+    if ($bytes < 8 || $bytes > 72) {
+        return false;
+    }
+    $chars = function_exists('mb_strlen') ? mb_strlen($password, 'UTF-8') : $bytes;
+    return $chars >= 8;
+}
+
+/**
+ * Отпечаток хеша пароля для привязки сессии к текущему паролю.
+ * Смена пароля меняет отпечаток — старые сессии становятся недействительными.
+ */
+function mokko_password_fingerprint($hash)
+{
+    return substr(hash('sha256', 'mokko-pv|' . (string)$hash), 0, 32);
 }

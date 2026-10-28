@@ -38,7 +38,7 @@ try {
 }
 
 // Пользователь и его роль берутся из БД, а не из сессии/запроса.
-$stmt = $pdo->prepare('SELECT id, role, status FROM users WHERE id = ? LIMIT 1');
+$stmt = $pdo->prepare('SELECT id, role, status, password_hash FROM users WHERE id = ? LIMIT 1');
 $stmt->execute(array($uid));
 $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -55,7 +55,7 @@ $isAdmin = ($currentUser['role'] === 'admin');
 $staffId  = isset($_SESSION['staff_id']) ? (int)$_SESSION['staff_id'] : 0;
 $staffRow = null;
 if ($staffId > 0) {
-    $st = $pdo->prepare('SELECT id, name, lastname, email FROM staff WHERE id = ? AND uid = ? LIMIT 1');
+    $st = $pdo->prepare('SELECT id, name, lastname, email, password_hash FROM staff WHERE id = ? AND uid = ? LIMIT 1');
     $st->execute(array($staffId, $uid));
     $staffRow = $st->fetch(PDO::FETCH_ASSOC);
     if (!$staffRow) {
@@ -63,6 +63,14 @@ if ($staffId > 0) {
         mokko_json(array('error' => 'invalid token'));
     }
     $isAdmin = false;
+}
+
+// Сессия привязана к текущему паролю: после смены пароля все остальные
+// сессии (включая украденные cookie) получают 401 на следующем запросе.
+$sessionHash = $staffRow ? (string)$staffRow['password_hash'] : (string)$currentUser['password_hash'];
+if (empty($_SESSION['pv']) || !hash_equals(mokko_password_fingerprint($sessionHash), (string)$_SESSION['pv'])) {
+    $_SESSION = array();
+    mokko_json(array('error' => 'invalid token'), 401);
 }
 
 /** Смены владельца (staff_id IS NULL) или конкретного бариста. */
@@ -220,6 +228,28 @@ function mokko_phone_clean($phone)
     return $plus . preg_replace('/\D+/', '', $phone);
 }
 
+/**
+ * Проверка e-mail сотрудника: формат, длина и глобальная уникальность
+ * (логин ищется и среди владельцев, и среди сотрудников).
+ */
+function mokko_staff_email_error($pdo, $email, $excludeId = 0)
+{
+    if ($email === '' || strlen($email) > 254 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return 'invalid email';
+    }
+    $u = $pdo->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+    $u->execute(array($email));
+    if ($u->fetch(PDO::FETCH_ASSOC)) {
+        return 'email already used';
+    }
+    $s = $pdo->prepare('SELECT id FROM staff WHERE email = ? AND id <> ? LIMIT 1');
+    $s->execute(array($email, (int)$excludeId));
+    if ($s->fetch(PDO::FETCH_ASSOC)) {
+        return 'email already used';
+    }
+    return '';
+}
+
 // ─── places ─────────────────────────────────────────────────────────────────
 function handlePlaces()
 {
@@ -327,6 +357,11 @@ function handleStaff()
             $phone    = mokko_str(isset($p['phone']) ? $p['phone'] : '', 20);
             $rate     = (float)(isset($p['rate']) ? $p['rate'] : 0);
 
+            $emailErr = mokko_staff_email_error($pdo, $login);
+            if ($emailErr !== '') {
+                mokko_json(array('error' => $emailErr));
+            }
+
             $s = $pdo->prepare('INSERT INTO staff (uid, name, lastname, email, phone, rate, password_hash) VALUES (?, ?, ?, ?, ?, ?, ?)');
             $s->execute(array($uid, $name, $lastname, $login, $phone, $rate, password_hash($password, PASSWORD_DEFAULT)));
             $id = (int)$pdo->lastInsertId();
@@ -344,6 +379,11 @@ function handleStaff()
             $login    = mokko_str(isset($p['login']) ? $p['login'] : '', 254);
             $phone    = mokko_str(isset($p['phone']) ? $p['phone'] : '', 20);
             $rate     = (float)(isset($p['rate']) ? $p['rate'] : 0);
+
+            $emailErr = mokko_staff_email_error($pdo, $login, $id);
+            if ($emailErr !== '') {
+                mokko_json(array('error' => $emailErr));
+            }
 
             $s = $pdo->prepare('UPDATE staff SET name = ?, lastname = ?, email = ?, phone = ?, rate = ? WHERE id = ? AND uid = ?');
             $s->execute(array($name, $lastname, $login, $phone, $rate, $id, $uid));
@@ -372,7 +412,10 @@ function handleStaff()
             break;
 
         case 'newpassword':
-            // Смена собственного пароля (бариста).
+            // Смена собственного пароля. Ограничиваем подбор старого пароля:
+            // без лимита украденная сессия превращалась в оракул.
+            mokko_rate_limit_guard('pwchg_' . (int)$uid, 5, 900);
+
             $old = isset($p['old_password']) ? (string)$p['old_password'] : '';
             $new = isset($p['password']) ? (string)$p['password'] : '';
 
@@ -387,8 +430,11 @@ function handleStaff()
                 if (!mokko_password_ok($new)) {
                     mokko_json(array('error' => 'password must be 8-72 characters'));
                 }
+                $newHash = password_hash($new, PASSWORD_DEFAULT);
                 $pdo->prepare('UPDATE staff SET password_hash = ? WHERE id = ? AND uid = ?')
-                    ->execute(array(password_hash($new, PASSWORD_DEFAULT), $staffId, $uid));
+                    ->execute(array($newHash, $staffId, $uid));
+                $_SESSION['pv'] = mokko_password_fingerprint($newHash);
+                mokko_rate_limit_clear('pwchg_' . (int)$uid);
                 mokko_json(array('success' => true));
             }
 
@@ -403,8 +449,11 @@ function handleStaff()
                 mokko_json(array('error' => 'password must be 8-72 characters'));
             }
 
+            $newHash = password_hash($new, PASSWORD_DEFAULT);
             $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
-                ->execute(array(password_hash($new, PASSWORD_DEFAULT), $uid));
+                ->execute(array($newHash, $uid));
+            $_SESSION['pv'] = mokko_password_fingerprint($newHash);
+            mokko_rate_limit_clear('pwchg_' . (int)$uid);
             mokko_json(array('success' => true));
             break;
 
@@ -513,6 +562,14 @@ function handleItem()
                 $ing = array();
             }
 
+            // rowCount() для UPDATE не отличает «нет строки» от «значения не изменились»,
+            // поэтому принадлежность проверяем отдельным SELECT.
+            $own = $pdo->prepare('SELECT id FROM items WHERE id = ? AND uid = ? LIMIT 1');
+            $own->execute(array($id, $uid));
+            if (!$own->fetch(PDO::FETCH_ASSOC)) {
+                mokko_json(array('error' => 'not found'));
+            }
+
             $s = $pdo->prepare('UPDATE items SET category_id = ?, name = ?, price = ?, mass = ?, em = ?, ingredients = ? WHERE id = ? AND uid = ?');
             $s->execute(array(
                 (int)(isset($p['category']) ? $p['category'] : 0),
@@ -589,6 +646,12 @@ function handleLager()
             $id    = (int)(isset($p['id']) ? $p['id'] : 0);
             $place = (int)(isset($p['place']) ? $p['place'] : 0);
             $diff  = (float)(isset($p['mass']) ? $p['mass'] : 0);
+
+            // Склад ведётся по конкретной кофейне: нельзя писать остатки
+            // в place, который не принадлежит текущему пользователю.
+            if (!mokko_place_owned($pdo, $uid, $place)) {
+                mokko_json(array('error' => 'invalid place'));
+            }
 
             $row = $pdo->prepare('SELECT mass FROM lager WHERE id = ? AND uid = ? LIMIT 1');
             $row->execute(array($id, $uid));
@@ -868,6 +931,8 @@ function handleUser()
 
     switch ($action) {
         case 'unlock':
+            // Проверка пароля — тоже оракул: 10 попыток на пользователя за 5 минут.
+            mokko_rate_limit_guard('pwchk_' . (int)$uid, 10, 300);
             $pass = isset($p['password']) ? (string)$p['password'] : '';
             $u = $pdo->prepare('SELECT password_hash FROM users WHERE id = ? LIMIT 1');
             $u->execute(array($uid));
@@ -877,6 +942,7 @@ function handleUser()
             break;
 
         case 'newpassword':
+            mokko_rate_limit_guard('pwchg_' . (int)$uid, 5, 900);
             $old = isset($p['old_password']) ? (string)$p['old_password'] : '';
             $new = isset($p['password']) ? (string)$p['password'] : '';
 
@@ -891,8 +957,11 @@ function handleUser()
                 mokko_json(array('error' => 'password must be 8-72 characters'));
             }
 
+            $newHash = password_hash($new, PASSWORD_DEFAULT);
             $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
-                ->execute(array(password_hash($new, PASSWORD_DEFAULT), $uid));
+                ->execute(array($newHash, $uid));
+            $_SESSION['pv'] = mokko_password_fingerprint($newHash);
+            mokko_rate_limit_clear('pwchg_' . (int)$uid);
             mokko_json(array('success' => true));
             break;
 
