@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>MOKKO CRM ДЛЯ ВАШЕЙ КОФЕЙНИ</title>
+        <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+        <link href="css/style.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="css/flexslider.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="css/contact.css">
+            <link href='http://fonts.googleapis.com/css?family=Exo+2:400,100,300,500,700' rel='stylesheet' type='text/css'>
+                <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400italic,400,300,600,700" rel="stylesheet" type="text/css">
+                <link rel="stylesheet" href="css/icons.css" />
+                </head>
+                <body>
+                
+                <!-- Start navigation -->
+                
+                <div id="navigation">
+                
+                <div class="nav-container">
+                
+				<h3><a href="#" class="close"><span aria-hidden="true" class="icon_close_alt2 medium" ></span></a></h3>
+				
+				<ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Download</a></li>
+                <li><a href="#">Coming Soon</a></li>
+                <li><a href="#">Books</a></li>
+                <li><a href="#">Newsletter</a></li>
+                <li><a href="#">Coupon</a></li>
+                <li><a href="#">Startup</a></li>
+                <li><a href="#">Corporate</a></li>
+                <li><a href="#">Realestate</a></li>
+                <li><a href="#">Events</a></li>
+                <li><a href="#">Plain Text</a></li>
+                
+				</ul>
+				
+                </div>
+                
+                </div>
+                
+                <!-- End navigation -->
+                
+                <!-- Start Header -->
+                
+                <div id="header">
+                
+                <div class="row">
+				<div class="span12">
+				
+                <h1><a href="#">MOKKO CRM</a></h1>
+                <h2 class="menulink"><a href="#">Menu</a></h2>
+                
+				</div>
+				<div class="clearfix"></div>
+                </div>
+				
+                </div>
+                
+                <!-- End Header -->
+                
+                <!-- Start Top -->
+                
+                <div id="hero">
+                
+                <!-- Start Content -->
+                
+                <div id="content" class="desktop hero">
+                
+				<div class="container">
+                
+                <div class="intro align-centered">
+                <h2>Уютная CRM <br/>для Вашего <span>кофейного бизнеса</span></h2>
+               <!-- <h4>Автоматизация, мобильность, контроль.</h4>-->
+                </div>
+                
+                <div class="clearfix"></div>
+                
+                <img src="images/desktop-screenshots.png" alt="Desktop Screenshots" class="promoimg"/>
+				</div>
+                
+                </div>
+                
+                <!-- End content -->
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                <!-- End Top -->
+                
+                <!-- Start panel -->
+                
+                <div class="panel">
+                
+                <div class="container">
+                
+				<div class="row">
+				
+                <div class="span3">
+                <div class="inner align-centered">
+                <div aria-hidden="true" class="icon_desktop large" ></div>
+                <h3>Формирование заказа</h3>
+                <p>Phasellus dignissim dictum magna, nec finibus metus convallis in. Cras sollicitudin porta quam vitae dictum. Morbi purus rutrum dignissim.</p>
+                <div class="clearfix"></div>
+                
+                </div>
+                </div>
+                
+                <div class="span3">
+                <div class="inner align-centered">
+                <div aria-hidden="true" class="icon_lightbulb_alt large" ></div>
+                <h3>Учет вашего <br/>склада</h3>
+                <p>Cras sollicitudin porta quam vitae dictum. Morbi purus rutrum dignissim. Phasellus dignissim dictum magna, nec finibus metus convallis in. </p>
+                <div class="clearfix"></div>
+                
+                </div>
+                </div>
+                
+                <div class="span3">
+                <div class="inner align-centered">
+                <div aria-hidden="true" class="icon_mobile large" ></div>
+                <h3>Учет работчего времени</h3>
+                <p>Phasellus dignissim dictum magna, nec finibus metus convallis in. Cras sollicitudin porta quam vitae dictum. Morbi purus rutrum dignissim.</p>
+                <div class="clearfix"></div>
+                
+                </div>
+                </div>
+				
+                <div class="span3">
+                <div class="inner align-centered">
+                <div aria-hidden="true" class="icon_calendar large" ></div>
+                <h3>Формирование отчетности</h3>
+                <p>Phasellus dignissim dictum magna, nec finibus metus convallis in. Cras sollicitudin porta quam vitae dictum. Morbi purus rutrum dignissim.</p>
+                <div class="clearfix"></div>
+                
+                </div>
+                </div>
+				
+				</div>
+                
+                </div>
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                <!-- End panel -->
+                
+                <!-- Start panel -->
+                
+                <div class="panel panel-alt box-right">
+                
+                <div class="container">
+                
+				<div class="row">
+				
+                <div class="span6">
+                <div class="inner">
+                
+                <h3>Одинаково хорош на всех устройствах</h3>
+                <p>Поддержка всех популярных планшетов на Android и iPad</p>
+                
+                <div class="clearfix"></div>
+                
+                <a href="#" class="button"><span aria-hidden="true" class="arrow_carrot-down_alt" ></span> Демо</a>
+               <!-- <a href="#" class="button button-light"><span aria-hidden="true" class="arrow_carrot-right_alt2" ></span> Learn More</a> -->
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                </div>
+                
+                <div class="span6 hidden">
+                <div class="clearfix"></div>
+                </div>
+				
+				</div>
+                
+                </div>
+                
+                <div class="image-box"></div>
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                <!-- End panel -->
+                
+                <div class="clearfix"></div>
+                
+                <!-- Start panel -->
+                
+                <div class="panel panel-alt box-left">
+                
+                <div class="container">
+                
+				<div class="row">
+				
+                
+                <div class="span6 hidden">
+                &nbsp;<div class="clearfix"></div>
+                </div>
+                
+                <div class="span6">
+                <div class="inner inner-shift">
+                
+                <h3>Интуитивно понятный интерфейс и максимум функциональности</h3>
+                <p>С первого входа в CRM вы сразу поймете как это работает!</p>
+                <div class="clearfix"></div>
+                
+                <a href="#" class="button"><span aria-hidden="true" class="icon_mail" ></span>Демо</a>
+                <!--<a href="#" class="button button-light"><span aria-hidden="true" class="arrow_carrot-right_alt2" ></span> Learn More</a>-->
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                </div>
+				
+				</div>
+                
+                </div>
+                
+                <div class="image-box"></div>
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                <!-- End panel -->
+                
+                <!-- Start panel -->
+                
+                <div class="panel panel-alt box-right">
+                
+                <div class="container">
+                
+				<div class="row">
+				
+                <div class="span6">
+                <div class="inner">
+                
+                <h3>Мы делаем CRM лучше с Вашей помощью!</h3>
+                <p>Сообщайте техоподдержке о Ваших пожеланиях и желаемом фунционале! И мы будем совершенствовать наш продукт для Вас и всех наших пользователей вместе в Вами! </p>
+                
+                <div class="clearfix"></div>
+                
+                <a href="#" class="button"><span aria-hidden="true" class="arrow_carrot-down_alt" ></span> Демо</a>
+                <!-- <a href="#" class="button button-light"><span aria-hidden="true" class="arrow_carrot-right_alt2" ></span> Learn More</a> -->
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                </div>
+                
+                <div class="span6 hidden">
+                <div class="clearfix"></div>
+                </div>
+				
+				</div>
+                
+                </div>
+                
+                <div class="image-box"></div>
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                <!-- End panel -->
+                
+                
+                <div class="clearfix"></div>
+                
+                <!-- Start panel -->
+                
+                <div class="panel price">
+                
+                <div class="container">
+                
+				<div class="inner intro align-centered">
+                <h3>Начните использование сейчас!</h3>
+                <p> </p>
+				</div>
+				
+				<div class="clearfix"></div>
+                
+				<div class="row align-centered">
+				 <div class="span2">
+                 <br/>
+                 </div>
+                <div class="span3">
+				
+                <div class="option">
+                
+                <h3>Мини</h3>
+                <span class="spacer"></span>
+                
+                <h2>1 999р.<span>/мес</span></h2>
+                
+                <ul>
+                <li><b>В нашем облаке</b></li>
+                <li>1 рабочее место</li>
+                <li>1 кофейня</li>
+                <li>Постоянная техподдержка</li>
+                </ul>
+
+                <a href="#" class="button">Заказать</a>
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                </div>
+				
+                <div class="span3">
+				
+                <div class="option">
+                <div class="ribbon">
+                <a href="#">Оптимальный</a>
+                </div>
+                <h3>Оптимальный</h3>
+                <span class="spacer"></span>
+                
+                <h2>4 999р.<span>/мес</span></h2>
+                
+                <ul>
+                <li><b>В нашем облаке</b></li>
+                <li>25 рабочих мест</li>
+                <li>7 кофейен</li>
+                <li>Постоянная техподдержка</li>
+                </ul>
+                
+                <a href="#" class="button button-dark">Заказать</a>
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                </div>
+				
+                <div class="span3">
+				
+                <div class="option">
+                
+                <h3>Коробка</h3>
+                <span class="spacer"></span>
+                
+                <h2>50 000р.<span>/год</span></h2>
+                
+                <ul>
+                <li><b>На вашем хостинге</b></li>
+                <li>до 100 рабочих мест</li>
+                <li>до 20 кофейен</li>
+                <li>Постоянная техподдержка</li>
+                </ul>
+                
+                <a href="#" class="button">Заказать</a>
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                </div>
+				<!---
+                <div class="span3">
+				
+                <div class="option">
+                
+                <h3>Starter</h3>
+                <span class="spacer"></span>
+                
+                <h2>$4<span>/mo</span></h2>
+                
+                <ul>
+                <li>10GB Monthly Bandwidth</li>
+                <li>5GB Disk Space</li>
+                <li>20 E-mail accounts</li>
+                <li>8 subdomains</li>
+                <li>24/24 Ultimated support</li>
+                </ul>
+                
+                <a href="#" class="button">Заказать и скачать</a>
+                
+                <div class="clearfix"></div>
+                
+                </div>
+                
+                </div>
+                -->
+				</div>
+				
+                </div>
+                
+                </div>
+                
+                <!-- End panel -->
+                
+                <div class="clearfix"></div>			
+                
+                <!-- Start footer -->
+                
+                <div class="panel" id="footer">
+                
+                <div class="container">
+                
+				<div class="row">
+                
+                <div class="span12">
+                
+                <div class="inner align-centered">
+                
+                <a href="#"><span aria-hidden="true" class="social_facebook medium" ></span></a> 
+                <a href="#"><span aria-hidden="true" class="social_twitter medium" ></span></a> 
+                <a href="#"><span aria-hidden="true" class="social_pinterest medium" ></span></a> 
+                <a href="#"><span aria-hidden="true" class="social_googleplus medium" ></span></a> 
+                <a href="#"><span aria-hidden="true" class="social_tumblr medium" ></span></a>  
+                <a href="#"><span aria-hidden="true" class="social_tumbleupon medium" ></span></a>  
+                <a href="#"><span aria-hidden="true" class="social_wordpress medium" ></span></a>  
+                <a href="#"><span aria-hidden="true" class="social_instagram medium" ></span></a>  
+                <a href="#"><span aria-hidden="true" class="social_dribbble medium" ></span></a>  
+                <a href="#"><span aria-hidden="true" class="social_vimeo medium" ></span></a>  
+                <a href="#"><span aria-hidden="true" class="social_linkedin medium" ></span></a>     
+                <a href="#"><span aria-hidden="true" class="social_rss medium" ></span></a>     
+                <a href="#"><span aria-hidden="true" class="social_deviantart medium" ></span></a>     
+                <a href="#"><span aria-hidden="true" class="social_share medium" ></span></a>     
+                <a href="#"><span aria-hidden="true" class="social_myspace medium" ></span></a>     
+                <a href="#"><span aria-hidden="true" class="social_skype medium" ></span></a>       
+                <a href="#"><span aria-hidden="true" class="social_youtube medium" ></span></a>       
+                <a href="#"><span aria-hidden="true" class="social_picassa medium" ></span></a>       
+                <a href="#"><span aria-hidden="true" class="social_googledrive medium" ></span></a>       
+                <a href="#"><span aria-hidden="true" class="social_flickr medium" ></span></a>     
+                <a href="#"><span aria-hidden="true" class="social_blogger medium" ></span></a>     
+                <a href="#"><span aria-hidden="true" class="social_spotify medium" ></span></a>     
+                <a href="#"><span aria-hidden="true" class="social_delicious medium" ></span></a>     
+                
+                <div class="clearfix"></div>
+                
+                <div class="copyright">
+                &copy; 2015 <a href="#">Sazhaev Alexandr</a>.
+                </div>
+                
+                <div class="clearfix"></div>
+                
+                </div>  
+                
+                </div>  
+                
+				</div>
+				
+                </div>
+                
+                </div>
+                
+                <!-- End footer --> 
+                
+                <script src="js/jquery.min.js"></script>
+                <script src="js/respond.min.js"></script>
+                <script src="js/scripts.js"></script> 
+                <script defer src="js/jquery.flexslider-min.js"></script> 
+                <script src="js/jquery.form.js"></script>
+                <script src="js/jquery.validate.min.js"></script>
+                <script src="js/contact.js"></script> 
+                <!--[if lte IE 7]><script src="css/lte-ie7.js"></script><![endif]-->
+                <!-- Yandex.Metrika counter -->
+                <script type="text/javascript">
+                (function (d, w, c) {
+                (w[c] = w[c] || []).push(function() {
+                try {
+                w.yaCounter28980245 = new Ya.Metrika({id:28980245,
+                webvisor:true,
+                clickmap:true,
+                trackLinks:true,
+                accurateTrackBounce:true,
+                trackHash:true});
+                } catch(e) { }
+                });
+                
+                var n = d.getElementsByTagName("script")[0],
+                s = d.createElement("script"),
+                f = function () { n.parentNode.insertBefore(s, n); };
+                s.type = "text/javascript";
+                s.async = true;
+                s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+                
+                if (w.opera == "[object Opera]") {
+                d.addEventListener("DOMContentLoaded", f, false);
+                } else { f(); }
+                })(document, window, "yandex_metrika_callbacks");
+                </script>
+                <noscript><div><img src="//mc.yandex.ru/watch/28980245" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+                <!-- /Yandex.Metrika counter -->
+                </body>
+                </html>

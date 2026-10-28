@@ -1,0 +1,8 @@
+# Шаблоны подключаются только через index.php; прямой доступ запрещён.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

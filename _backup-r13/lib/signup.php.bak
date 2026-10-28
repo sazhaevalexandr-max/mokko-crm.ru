@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0e13">
+<title>Создание аккаунта — MOKKO CRM</title>
+
+<link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>/images/brand/favicon.svg">
+<link href="<?= BASE_PATH ?>/css/bootstrap-4.6.2.min.css" rel="stylesheet">
+<link href="<?= BASE_PATH ?>/css/glyphicons.css" rel="stylesheet">
+<link href="<?= BASE_PATH ?>/css/theme.css?v=12" rel="stylesheet">
+<script>var BASE_URL = <?= mokko_js(BASE_URL) ?>;</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<style>
+
+.form-control-feedback{
+    display:none;
+}
+.has-feedback .form-control-feedback{
+    display:block;
+}
+.mobile{
+    display:none;
+}
+@media only screen and  (max-width: 767px),
+only screen and (max-device-width: 767px) {
+
+    .no_mobile{
+        display:none;
+    }
+    .mobile{
+        display:block;
+    }
+}
+
+.loader{
+    width: 20px;
+    position: absolute;
+    top: 32px;
+    right: 20px;
+    z-index: 2;
+    display: block;
+    line-height: 20px;
+    text-align: center;
+    pointer-events: none;
+}
+
+</style>
+
+
+</head>
+
+<body class="auth-body auth-body--center">
+
+<header class="auth-brandbar">
+    <a class="brand" href="<?= BASE_URL ?>/login" aria-label="MOKKO CRM">
+        <span class="brand-text">MOKKO<span class="brand-crm">CRM</span></span>
+    </a>
+</header>
+
+<div class="container">
+<div class="auth-card auth-card--wide">
+<center><h3>Создание аккаунта<small class="no_mobile"><br/>Быстрое оформление подписки на сервисы MOKKO CRM</small></h3></center>
+
+
+
+
+
+<div class="row">
+
+<hr>
+</div>
+
+<form id="registraion">
+
+<div class="row">
+     <div class="col-md-6">
+         <div class="form-group">
+             <label for="Email">Email</label>
+             <input type="email" class="form-control" id="Email" placeholder="Email">
+                 <div class="loader"><img style="width:20px;" src="<?= BASE_PATH ?>/images/load.gif"></div>
+                 <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                 <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                 <span id="inputError2Status" class="sr-only">(error)</span>
+        </div>
+         
+         <div class="form-group">
+             <label for="Password">Пароль <small>(латинские буквы, цифры<span class="no_mobile">, тире и подчеркивание</span>)</small></label>
+             <input type="password" class="form-control" id="Password" placeholder="Минимум 8 знаков" autocomplete="new-password">
+                 <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                 <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                 <span id="inputError2Status" class="sr-only">(error)</span>
+        </div>
+         
+    </div>
+
+     <div class="col-md-6">
+         
+         <div class="form-group">
+             <label for="Name">Имя <small>(только буквы)</small></label>
+             <input type="text" class="form-control" id="Name" placeholder="Имя">
+                 <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                 <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                 <span id="inputError2Status" class="sr-only">(error)</span>
+         </div>
+         
+         <div class="form-group">
+             <label for="Cuntry">Ваша страна</label>
+             <select name="country_code" id="country_code" data-bind="value: countryCode, setOnBlur: &#39;value&#39;" class="form-control"><option value="us">United States</option>
+                 <option value="ca">Canada</option>
+                 <option value="jp">日本</option>
+                 <option value="au">Australia</option>
+                 <option value="al">Albania</option>
+                 <option value="dz">Algeria</option>
+                 <option value="ao">Angola</option>
+                 <option value="ai">Anguilla</option>
+                 <option value="ag">Antigua and Barbuda</option>
+                 <option value="ar">Argentina</option>
+                 <option value="am">Armenia</option>
+                 <option value="aw">Aruba</option>
+                 <option value="at">Austria</option>
+                 <option value="az">Azerbaijan</option>
+                 <option value="bs">Bahamas</option>
+                 <option value="bh">Bahrain</option>
+                 <option value="bd">Bangladesh</option>
+                 <option value="bb">Barbados</option>
+                 <option value="by">Belarus</option>
+                 <option value="be">Belgium</option>
+                 <option value="bz">Belize</option>
+                 <option value="bj">Benin</option>
+                 <option value="bm">Bermuda</option>
+                 <option value="bt">Bhutan</option>
+                 <option value="bo">Bolivia</option>
+                 <option value="ba">Bosnia and Herzegovina</option>
+                 <option value="bw">Botswana</option>
+                 <option value="br">Brazil</option>
+                 <option value="vg">British Virgin Islands</option>
+                 <option value="bn">Brunei</option>
+                 <option value="bg">Bulgaria</option>
+                 <option value="bf">Burkina Faso</option>
+                 <option value="kh">Cambodia</option>
+                 <option value="cm">Cameroon</option>
+                 <option value="cv">Cape Verde</option>
+                 <option value="ky">Cayman Islands</option>
+                 <option value="td">Chad</option>
+                 <option value="cl">Chile</option>
+                 <option value="cn">China</option>
+                 <option value="co">Colombia</option>
+                 <option value="cr">Costa Rica</option>
+                 <option value="hr">Croatia</option>
+                 <option value="cy">Cyprus</option>
+                 <option value="cz">Czech Republic</option>
+                 <option value="ci">Côte d&#39;Ivoire</option>
+                 <option value="dk">Denmark</option>
+                 <option value="dm">Dominica</option>
+                 <option value="do">Dominican Republic</option>
+                 <option value="ec">Ecuador</option>
+                 <option value="eg">Egypt</option>
+                 <option value="sv">El Salvador</option>
+                 <option value="ee">Estonia</option>
+                 <option value="fj">Fiji</option>
+                 <option value="fi">Finland</option>
+                 <option value="fr">France</option>
+                 <option value="ga">Gabon</option>
+                 <option value="gm">Gambia</option>
+                 <option value="de">Germany</option>
+                 <option value="gh">Ghana</option>
+                 <option value="gr">Greece</option>
+                 <option value="gd">Grenada</option>
+                 <option value="gu">Guam (USA)</option>
+                 <option value="gt">Guatemala</option>
+                 <option value="gw">Guinea-Bissau</option>
+                 <option value="gy">Guyana</option>
+                 <option value="ht">Haiti</option>
+                 <option value="hn">Honduras</option>
+                 <option value="hk">Hong Kong</option>
+                 <option value="hu">Hungary</option>
+                 <option value="is">Iceland</option>
+                 <option value="in">India</option>
+                 <option value="id">Indonesia</option>
+                 <option value="ie">Ireland</option>
+                 <option value="il">Israel</option>
+                 <option value="it">Italy</option>
+                 <option value="jm">Jamaica</option>
+                 <option value="jo">Jordan</option>
+                 <option value="kz">Kazakhstan</option>
+                 <option value="ke">Kenya</option>
+                 <option value="kw">Kuwait</option>
+                 <option value="kg">Kyrgyzstan</option>
+                 <option value="la">Laos</option>
+                 <option value="lv">Latvia</option>
+                 <option value="lb">Lebanon</option>
+                 <option value="lr">Liberia</option>
+                 <option value="li">Liechtenstein</option>
+                 <option value="lt">Lithuania</option>
+                 <option value="lu">Luxembourg</option>
+                 <option value="mo">Macau</option>
+                 <option value="mk">Macedonia</option>
+                 <option value="mg">Madagascar</option>
+                 <option value="mw">Malawi</option>
+                 <option value="my">Malaysia</option>
+                 <option value="ml">Mali</option>
+                 <option value="mt">Malta</option>
+                 <option value="mr">Mauritania</option>
+                 <option value="mu">Mauritius</option>
+                 <option value="mx">Mexico</option>
+                 <option value="fm">Micronesia</option>
+                 <option value="md">Moldova (Republic of)</option>
+                 <option value="mn">Mongolia</option>
+                 <option value="ms">Montserrat</option>
+                 <option value="ma">Morocco</option>
+                 <option value="mz">Mozambique</option>
+                 <option value="mm">Myanmar</option>
+                 <option value="na">Namibia</option>
+                 <option value="np">Nepal</option>
+                 <option value="nl">Netherlands</option>
+                 <option value="nz">New Zealand</option>
+                 <option value="ni">Nicaragua</option>
+                 <option value="ne">Niger</option>
+                 <option value="ng">Nigeria</option>
+                 <option value="mp">Northern Mariana Islands (USA)</option>
+                 <option value="no">Norway</option>
+                 <option value="om">Oman</option>
+                 <option value="pk">Pakistan</option>
+                 <option value="pw">Palau</option>
+                 <option value="pa">Panama</option>
+                 <option value="pg">Papua New Guinea</option>
+                 <option value="py">Paraguay</option>
+                 <option value="pe">Peru</option>
+                 <option value="ph">Philippines</option>
+                 <option value="pl">Poland</option>
+                 <option value="pt">Portugal</option>
+                 <option value="pr">Puerto Rico (USA)</option>
+                 <option value="qa">Qatar</option>
+                 <option value="cg">Republic Of Congo</option>
+                 <option value="ro">Romania</option>
+                 <option selected="selected" value="ru">Russia</option>
+                 <option value="rw">Rwanda</option>
+                 <option value="kn">Saint Kitts &amp; Nevis Anguilla</option>
+                 <option value="lc">Saint Lucia</option>
+                 <option value="vc">Saint Vincent &amp; Grenadines</option>
+                 <option value="st">Sao Tome and Principe</option>
+                 <option value="sa">Saudi Arabia</option>
+                 <option value="sn">Senegal</option>
+                 <option value="rs">Serbia</option>
+                 <option value="sc">Seychelles</option>
+                 <option value="sl">Sierra Leone</option>
+                 <option value="sg">Singapore</option>
+                 <option value="sk">Slovakia</option>
+                 <option value="si">Slovenia</option>
+                 <option value="sb">Solomon Islands</option>
+                 <option value="za">South Africa</option>
+                 <option value="kr">South Korea</option>
+                 <option value="es">Spain</option>
+                 <option value="lk">Sri Lanka</option>
+                 <option value="sr">Suriname</option>
+                 <option value="sz">Swaziland</option>
+                 <option value="se">Sweden</option>
+                 <option value="ch">Switzerland</option>
+                 <option value="tw">Taiwan</option>
+                 <option value="tj">Tajikistan</option>
+                 <option value="tz">Tanzania</option>
+                 <option value="th">Thailand</option>
+                 <option value="tg">Togo</option>
+                 <option value="tt">Trinidad and Tobago</option>
+                 <option value="tn">Tunisia</option>
+                 <option value="tr">Turkey</option>
+                 <option value="tm">Turkmenistan</option>
+                 <option value="tc">Turks and Caicos Islands</option>
+                 <option value="vi">US Virgin Islands (USA)</option>
+                 <option value="ug">Uganda</option>
+                 <option value="ua">Ukraine</option>
+                 <option value="ae">United Arab Emirates</option>
+                 <option value="gb">United Kingdom</option>
+                 <option value="uy">Uruguay</option>
+                 <option value="uz">Uzbekistan</option>
+                 <option value="ve">Venezuela</option>
+                 <option value="vn">Vietnam</option>
+                 <option value="ye">Yemen</option>
+                 <option value="zm">Zambia</option>
+                 <option value="zw">Zimbabwe</option></select>
+         </div>
+     </div>
+
+</div>
+
+<div class="row">
+    
+    <hr>
+</div>
+
+<div class="row">
+
+    <div class="col-md-6 no_mobile">
+      <!-- <span style="margin-top: 10px;float: left;"> Уже есть аккаунт? <a href="#" data-toggle="modal" data-target=".bs-example-modal-sm"><b>Войти</b></a></span>-->
+
+      <span style="margin-top: 10px;float: left;"> Уже есть аккаунт? <a href="<?= BASE_URL ?>/login" ><b>Войти</b></a></span>
+	  </div>
+    
+    <div class="col-md-6">
+        <button type="submit" class="btn btn-primary btn-get js-modal-toggle-registration pull-right col-md-12 col-12" href="#">Продолжить</button>
+    </div>
+    
+    <div class="col-12 mobile">
+        <center><span style="margin-top: 10px;float: left;"> Уже есть аккаунт? <a href="#" data-toggle="modal" data-target=".bs-example-modal-sm"><b>Войти</b></a></span></center>
+    </div>
+    
+    
+</div>
+<hr>
+<div class="row">
+    <br/> <br/>
+  <div class="col-md-5 col-4"></div><div class="col-md-2"><img class="col-md-12 col-4" src="<?= BASE_PATH ?>/images/secure.png"></div>
+<br/>
+<br/>
+</div>
+
+<div class="row">
+ <br/>
+ <hr>
+<center>&copy; MOKKO CRM · 2026</center>
+</div>
+
+</div>
+</div>
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title">Вход в аккаунт</h4>
+</div>
+<div class="modal-body">
+<!---->
+<div class="form-group">
+    <label for="Login_Email1">Email</label>
+    <input type="email" class="form-control" id="Login_Email1" placeholder="Email">
+        </div>
+<div class="form-group">
+    <label for="Login_Password">Пароль</label>
+    <input type="password" class="form-control" id="Login_Password" placeholder="******">
+        <span><a style="margin-top: -28px;position: absolute;right: 22px;" href="#">Восстановить</a></span>
+        
+        
+</div>
+<!---->
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary col-md-12 col-12">Войти</button>
+</div>
+        </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/bootstrap-4.6.2.bundle.min.js"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/theme.js"></script>
+<script>
+    $(document).ready(function(){
+                      $('.loader').hide();
+
+                      
+                      $('input#Email, input#Password, input#Name').unbind().blur( function(){
+                                                                                 var id = $(this).attr('id');
+                                                                                 var val = $(this).val();
+                                                                                 
+                                                                                 switch(id){
+                                                                                 case 'Name':
+                                                                                 var str_name = /^[a-zA-Zа-яА-Я]+$/;
+                                                                                 if(val.length > 2 && val != '' && str_name.test(val)){
+                                                                                 $(this).parent().removeClass('has-error has-feedback');
+                                                                                 $(this).parent().addClass('has-success has-feedback');
+                                                                                 $(this).parent().find('.glyphicon-remove').removeClass('glyphicon-remove');
+                                                                                 $(this).parent().find('span.glyphicon').addClass('glyphicon-ok');
+                                                                                 }else{
+                                                                                 $(this).parent().removeClass('has-success has-feedback');
+                                                                                 $(this).parent().addClass('has-error has-feedback');
+                                                                                 $(this).parent().find('.glyphicon-ok').removeClass('glyphicon-ok');
+                                                                                 $(this).parent().find('span.glyphicon').addClass('glyphicon-remove');
+                                                                                 }
+                                                                                 break;
+                                                                                 
+                                                                                 case 'Password':
+                                                                                 var str_pass = /^[a-zA-Zа-яА-Я0-9_-]+$/;
+                                                                                 if(val.length >= 8 && val.length <= 72 && val != '' && str_pass.test(val)){
+                                                                                 $(this).parent().removeClass('has-error has-feedback');
+                                                                                 $(this).parent().addClass('has-success has-feedback');
+                                                                                 $(this).parent().find('.glyphicon-remove').removeClass('glyphicon-remove');
+                                                                                 $(this).parent().find('span.glyphicon').addClass('glyphicon-ok');
+                                                                                 }else{
+                                                                                 $(this).parent().removeClass('has-success has-feedback');
+                                                                                 $(this).parent().addClass('has-error has-feedback');
+                                                                                 $(this).parent().find('.glyphicon-ok').removeClass('glyphicon-ok');
+                                                                                 $(this).parent().find('span.glyphicon').addClass('glyphicon-remove');
+                                                                                 }
+                                                                                 
+                                                                                 
+                                                                                 break;
+                                                                                
+                                                                                 
+                                                                                 case 'Email':
+                                                                                 
+                                                                                 if(val != '' ){
+                                                                                 var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+                                                                                 $('.loader').show();
+                                                                                 setTimeout(function(){
+                                                                                 $('.loader').hide();
+                                                                                 if(emailRegex.test(val)){
+                                                                                 $('input#Email').parent().removeClass('has-error has-feedback');
+                                                                                 $('input#Email').parent().addClass('has-success has-feedback');
+                                                                                 $('input#Email').parent().find('.glyphicon-remove').removeClass('glyphicon-remove');
+                                                                                 $('input#Email').parent().find('span.glyphicon').addClass('glyphicon-ok');
+                                                                                 }else{
+                                                                                 $('input#Email').parent().removeClass('has-success has-feedback');
+                                                                                 $('input#Email').parent().addClass('has-error has-feedback');
+                                                                                 $('input#Email').parent().find('.glyphicon-ok').removeClass('glyphicon-ok');
+                                                                                 $('input#Email').parent().find('span.glyphicon').addClass('glyphicon-remove');
+                                                                                 }
+                                                                                 }, 300);
+                                                                                 }else{
+                                                                                 $(this).parent().removeClass('has-success has-feedback');
+                                                                                 $(this).parent().addClass('has-error has-feedback');
+                                                                                 $(this).parent().find('.glyphicon-ok').removeClass('glyphicon-ok');
+                                                                                 $(this).parent().find('span.glyphicon').addClass('glyphicon-remove');
+                                                                                 }
+                                                                                 break;
+                                                                                 
+                                                                                 }
+                                                                                 });
+                      
+                      
+                       $("form#registraion").submit(function( event ) {
+                                                    
+                                   var password = $('input#Password');
+                                   var mail = $('input#Email');
+                                   var name = $('input#Name');
+                                             
+                                if(password.parent().hasClass('has-success') && mail.parent().hasClass('has-success') && name.parent().hasClass('has-success')){
+                      ///if all success
+                                submiter(mail.val(),password.val(),name.val());
+
+                                }else{
+                                ///if not all success
+                                if(password.val()!==''  && mail.val()!=='' && name.val()!==''){
+                                                    
+                                 if($('input#Email, input#Password, input#Name').parent().hasClass('has-error')){
+                                //nothing...
+                                 }else{
+                                                    
+                                 $(".form-group:not(.has-success)").find('input').blur();
+                                if(password.parent().hasClass('has-success') && mail.parent().hasClass('has-success') && name.parent().hasClass('has-success')){
+                                submiter(mail.val(),password.val(),name.val());
+                                }
+
+
+                                }
+                                }
+                                                    
+                                }
+                                            
+                                   return false;
+                      });
+                      
+                      function submiter(login,pass,name){
+                      
+                     
+///
+                      var reg = new Object();
+                      
+                      reg.login = login;
+                      reg.password = pass;
+                      reg.name = name;
+            
+                      var filter = new Array();
+                      filter[0] = "login";
+                      filter[1] = "password";
+                      filter[2] = "name";
+                      
+                      var data_json = JSON.stringify(reg, filter);
+                      
+                      $.ajax({
+                             type: 'POST',
+                             url: BASE_URL + '/api/auth.php?action=register',
+                             contentType: 'application/json',
+                             data: data_json,
+                             dataType: 'json',
+                             complete: function(){
+								$('button').prop( "disabled", true );
+                             },
+                        }).done(function( data ) {
+                            if (data.error) {
+                                $('button').prop("disabled", false);
+                                alert('Ошибка регистрации: ' + data.error);
+                            } else {
+                                document.write('<br/><br/><center><h3>Регистрация прошла успешно, можете <a href="<?= BASE_URL ?>/login">авторизоваться</a></h3></center>');
+                            }
+                        });
+                      
+                     // document.write(data_json);
+                      
+                      
+///
+                       return false;
+                      }
+                      
+                      });
+    </script>
+
+
+</body>
+</html>

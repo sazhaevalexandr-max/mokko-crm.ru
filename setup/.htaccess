@@ -1,0 +1,10 @@
+# Установщик доступен только с локального хоста.
+<IfModule mod_authz_core.c>
+    Require local
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from 127.0.0.1
+    Allow from ::1
+    Deny from all
+</IfModule>

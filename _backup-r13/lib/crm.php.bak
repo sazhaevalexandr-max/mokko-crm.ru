@@ -1,0 +1,439 @@
+<?php
+    if(!defined('MOKKO'))die;
+    
+    if($_SESSION['sid'] == "uid"){
+    $access = "admin";
+    $type_ac = "Администратор";
+    }else{
+    $access = "barista";
+    $type_ac = "Бариста";
+    }
+    
+    ?>
+
+
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="ru" > <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="ru" > <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="ru" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="ru" > <!--<![endif]-->
+
+<head prefix="og: https://ogp.me/ns# article: https://ogp.me/ns/article#">
+
+<meta charset="utf-8">
+
+<meta name="description" content="сrm erp для автоматизации кофейни">
+<meta name="keywords" content="site, google, internet">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="robots" content="index,follow">
+
+<title>MOKKO CRM</title>
+
+
+
+<link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>/images/brand/favicon.svg">
+
+<link href="<?= BASE_PATH ?>/css/bootstrap-4.6.2.min.css" rel="stylesheet">
+<link href="<?= BASE_PATH ?>/css/glyphicons.css" rel="stylesheet">
+
+<link rel="stylesheet" type="text/css" href="<?= BASE_PATH ?>/css/panel.css?v=4" />
+<link rel="stylesheet" type="text/css" href="<?= BASE_PATH ?>/css/crm.css?v=5" />
+<link rel="stylesheet" type="text/css" href="<?= BASE_PATH ?>/css/jquery-confirm.css" />
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/bootstrap-4.6.2.bundle.min.js"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/jquery-confirm.js"></script>
+<script src="<?= BASE_PATH ?>/js/jquery-ui.js"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/theme.js"></script>
+
+
+<link rel="stylesheet" href="<?= BASE_PATH ?>/css/offline-theme-slide.css" />
+<link rel="stylesheet" href="<?= BASE_PATH ?>/css/offline-language-english.css" />
+
+<link href="<?= BASE_PATH ?>/css/theme.css?v=12" rel="stylesheet">
+
+<style type="text/css">
+.jconfirm.jconfirm-white .jconfirm-bg {
+    background-color: rgba(5, 7, 10, .72);
+}
+</style>
+
+<meta property="og:title" content="MOKKO CRM" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="http://crm.mokko-crm.ru/framework/frontend/common/images/ls-logo.png" />
+<meta property="og:url" content="http://crm.mokko-crm.ru/" />
+<meta property="og:site_name" content="MOKKO CRM" />
+
+<script>
+var BASE_URL = <?= mokko_js(BASE_URL) ?>;
+var key = <?= mokko_js(isset($_SESSION['key']) ? (string)$_SESSION['key'] : '') ?>;
+var uid = <?= mokko_js(isset($_SESSION['uid']) ? (string)$_SESSION['uid'] : '') ?>;
+var sid = <?= mokko_js(isset($_SESSION['sid']) ? (string)$_SESSION['sid'] : '') ?>;
+var place = <?= mokko_js(isset($_SESSION['place']) ? (string)$_SESSION['place'] : '') ?>;
+</script>
+
+
+</head>
+
+
+<body class="layout theme-dark crm-page">
+
+
+<nav class="navbar navbar-default navbar-fixed-top fixed-top usertop" role="navigation">
+
+<!--
+<img class="navbar-toggle collapsed pull_right ham"  data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false" src="../images/ham.png?ver=0.2" />-->
+
+    <ul class="nav navbar-nav">
+        <li class="nav-item brand-nav">
+            <a class="brand" href="<?= BASE_URL ?>/panel" aria-label="MOKKO CRM">
+                <span class="brand-text">MOKKO<span class="brand-crm">CRM</span></span>
+            </a>
+        </li>
+        <li class="navbar-brand time">
+            <!--<b>00:00:00</b>-->
+            <small>на рабочем месте</small>
+            <div class="time_online"></div>
+        </li>
+    </ul>
+       <ul class="nav navbar-nav pull-right ">
+           
+    <!--    <li class=""><a class="fullscreen_btn"><i class="glyphicon glyphicon-fullscreen"></i></a></li>--->
+        
+<li class="navbar-brand line_right no_mobile"> <small class='place no_mobile'><i class="glyphicon glyphicon-map-marker"></i><em></em></span></small>   <span class='stuff'><?php print($type_ac); ?></span></li>
+        <li class="dropdown"><a href="#" class="dropdown-toggle ham crm_menues" data-toggle="dropdown"><img src="<?= BASE_PATH ?>/images/ham.png?ver=0.2" ></a>
+            <ul class="dropdown-menu usermenu" role="menu" style="left:0px;">
+                <li class="avara"><img class="avatar" src="<?= BASE_PATH ?>/images/no-avatar.png" class="img-circle"> <div  class="name_avatar"></div></li>
+
+<?php if($access == "admin"){ ?> <li><a href="<?= BASE_URL ?>/panel"><i class="glyphicon glyphicon-cog"></i> Панель управления</a></li> <?php }else{ ?>
+<li><a href="#" class="new_pass_s"><i class="glyphicon glyphicon-cog"></i> Смена пароля</a></li>
+<?php } ?>
+
+<li class="for_mobile"><a href="#dashboard" style="color: #dedede;"><i class="glyphicon glyphicon-edit"></i> Заказ</a></li>
+<li class="for_mobile"><a href="#guests" class="load_guests" style="color: #dedede;"><i class="glyphicon glyphicon-time"></i> Гости</a></li>
+            <!--    <li><a href="#"><i class="glyphicon glyphicon-inbox"></i> Уведомления <span class="new badge">0</span></a></li>
+                <li><a href="#"><i class="glyphicon glyphicon-user"></i> Профиль</a></li>-->
+                <li class="divider"></li>
+                <li class='im_out'><a href="#"><i class="glyphicon glyphicon-lock"></i> Отойти</a></li>
+                <li  class='shift_end'><a href="#"><i class="glyphicon glyphicon-off"></i> Закрыть смену</a></li>
+            </ul>
+        </li>
+    </ul>
+
+</nav>
+
+<div class="left_bar col-sm-3 col-md-2 col-12 sidebar">
+    
+    
+    <ul class="menu_left">
+        <li class="waves-effect waves-light"><a class="active" href="#dashboard" ><i class="glyphicon glyphicon-edit"></i> Заказ</a></li>
+        <li  class="waves-effect waves-light"><a class="load_guests" href="#guests" module="guests"><i class="glyphicon glyphicon-time"></i> Гости</a></li>
+        <!--<li class="waves-effect waves-light"><a href="#lager" module="lager"><i class="glyphicon glyphicon-list-alt"></i> Склад</a></li>-->
+    </ul>
+    
+    
+    <div class="total_summ">
+        <div class="maximize"></div>
+        <div class="short"></div>
+        <span class="sum">0</span><small>рублей</small>
+        
+        <ul class="zakaz">
+            
+        </ul>
+        <center><button type="button" class="btn btn-default oplata_btn">Оплата</button></center>
+    </div>
+    
+    
+</div>
+
+
+
+
+<div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
+
+
+<div class="bg-light">
+<div class="row">
+<div class="col-md-12 c2" style="    padding-top: 30px;">
+
+<div class="layer active" id="dashboard">
+    <div class="col-md-12">
+        <div class="well col-md-3 col-12 col-sm-4 well-sm pull-right edit_g guest">Гость: <a class='name_guest' phone='' href="#">Счет не открыт</a><div class='input_guest'><form id="edit_g">
+<input type='text' class='new_name' placeholder='Имя Фамилия' name='name_guest' /><br/>
+
+<!---<input type='text' maxlength='11' name='phone_guest' class='new_phone' placeholder='+7' />--->
+</form></div><a class='edit_guest' href="#"><i class="glyphicon glyphicon-pencil pull-right"></i></a><button style="display:none;"  type="button" class="btn btn-default save_guest pull-right">Сохранить</button>
+        </div>
+        
+        
+        <form id='guest_form' role="form">
+            <div style='padding:0px' class="input-group col-12 col-md-6">
+                
+                
+                <span class="input-group-btn">
+                    <input type='hidden' name='type_guest' value='new'>
+                        <input type='hidden' name='id_guest'>
+                            
+                            <button class="btn btn-primary add_guest" type="button" style="border-radius:4px;"><span>Открыть счет</span></button>
+                             <div class="ui-widget">
+                            <input type="text" class="form-control" id="guest" name='guest' placeholder="Название заказа">
+                                </div>
+                </span>
+            </div>
+        </form>
+        
+        <br/><br/>
+    </div>
+    <div class="col-md-12">
+        <div class="btn-group btn-group-sm filter_items">
+
+        </div>
+        <br/><br/><br/>
+    </div>
+    
+    <div id="dash">
+<center><h1 class="nope">Загружаю меню <div class="loader-menu fa fa-spin colored-border"></div></h1></center>
+           </div>
+</div>
+
+<div class='layer' id="guests">
+    
+   <div class="loader-menu fa fa-spin colored-border"></div>
+
+
+    </div>
+
+<div id="check">
+    <br/>
+    <center>************************</center>
+    <center><span class="place_name_check"></span><br/><span class="place_address_check"></span>
+       </center>
+     <center>ЧЕК № <span class="check_id"></span></center>
+     <center>************************</center>
+    <center>Кассир: <span class="lastname_check"></span> <span class="name_check"></span></center>
+    <br/>
+     <div style="padding:15px;" class="list_zakaz_check">
+      <br/>
+      Такое 1<span style="float:right;">РУБ:  100</span><br/>
+      ----------------------------------------<br/>
+      Такое 1<span style="float:right;">РУБ:  100</span><br/>
+      ----------------------------------------<br/>
+      Такое 1<span style="float:right;">РУБ:  100</span><br/>
+      ----------------------------------------<br/>
+      Такое 1<span style="float:right;">РУБ:  100</span><br/>
+      ----------------------------------------<br/>
+          <center>************************</center>
+      </div>
+     <center>Итого:<span class="itogo_check"></span> РУБ.</center>
+     <br/><br/>
+<center><b>Большое спасибо!<br/>Произвольная строка</b>
+      <br/><br/>
+
+      ИНН: ***********, КПП:*********<br/>
+      11/12/2017, 12:12:12<br/>
+      Тел: 0(000)000-00-00<br/>
+      <u>MOKKO-CRM.RU</u>
+<br/>
+<br/>
+      </center>
+</div>
+
+</div>
+
+
+
+</div>
+</div>
+
+
+
+</div>
+
+
+
+
+<script>
+$(document).ready(function() {
+                  
+                  
+                  "use strict";
+                  
+                  $('.next_step_for_buy').click(function(){
+                                              var cart = $('#cart').serialize();
+                                              window.location.href = "http://crm.mokko-crm.ru/payment/base/?"+cart;
+                                              });
+                  
+                  $('.package-toggle').each(function () {
+                                            $(this).change(function() {
+                                                           var curr_class = '.' + $(this).attr('id');
+                                                           var price = $(this).attr('data-price');
+                                                           var price_box = $('.pricing-table li.price span');
+                                                           
+                                                           $(curr_class).toggleClass('active');
+                                                           
+                                                           if (price) {
+                                                           if ($(curr_class).hasClass('active')) {
+                                                           price_box.html(parseInt(price_box.html(), 10) + parseInt(price, 10));
+                                                           }
+                                                           else {
+                                                           price_box.html(parseInt(price_box.html(), 10) - parseInt(price, 10));
+                                                           }
+                                                           }
+                                                           });
+                                            });
+                  });
+</script>
+<!---если залогинен------>
+<!--- тарифы
+<div class="container-table">
+<div class="pricing wow fadeInRight table-1 animated" data-wow-offset="400" data-wow-delay=".2s" style="visibility: visible;-webkit-animation-delay: .2s; -moz-animation-delay: .2s; animation-delay: .2s;">
+<h3>Кофейня</h3>
+<div class="price-container ">
+<div class="col-md-12 dollar">4000</div>
+<div class="col-md-12 per-month">РУБ. / МЕСЯЦ</div>
+</div>
+<em class="detail-price">Тариф для небольшой кофейни</em>
+<ul class="price-features">
+<li>
+<span class="feature">Формирование заказа</span>
+<span class="check glyphicon glyphicon-ok-sign pull-right"></span>
+</li>
+<li>
+<span class="feature">Формирование меню</span>
+<span class="check glyphicon glyphicon-ok-sign pull-right"></span>
+</li>
+<li>
+<span class="feature">Подробная статистика</span>
+<span class="check glyphicon glyphicon-ok-sign pull-right"></span>
+</li>
+<li>
+<span class="feature">Кухня</span>
+<span class="cross icon-cross"></span>
+</li>
+<li>
+<span class="feature">Учет склада</span>
+<span class="cross icon-cross"></span>
+</li>
+<li>
+<span class="feature">Кофейни</span>
+<span class="check pull-right">от 1</span>
+</li>
+<li>
+<span class="feature">Пользователи</span>
+<span class="check pull-right">от 3</span>
+</li>
+</ul>
+<a class="order" href="#">Выбрать</a>
+
+</div>
+
+
+<div class="pricing wow bounceIn animated" data-wow-offset="300" style="visibility: visible;">
+<h3>Ресторан</h3>
+<div class="price-container ">
+<div class="col-md-12 dollar">9000</div>
+<div class="col-md-12 per-month">РУБ. / МЕСЯЦ</div>
+</div>
+<em class="detail-price">Тариф для бльшой кофейни</em>
+<ul class="price-features">
+<li>
+<span class="feature">Формирование заказа</span>
+<span class="check glyphicon glyphicon-ok-sign pull-right"></span>
+</li>
+<li>
+<span class="feature">Формирование меню</span>
+<span class="check glyphicon glyphicon-ok-sign pull-right"></span>
+</li>
+<li>
+<span class="feature">Подробная статистика</span>
+<span class="check glyphicon glyphicon-ok-sign pull-right"></span>
+</li>
+<li>
+<span class="feature">Кухня</span>
+<span class="check glyphicon glyphicon-ok-sign pull-right"></span>
+</li>
+<li>
+<span class="feature">Учет склада</span>
+<span class="check glyphicon glyphicon-ok-sign pull-right"></span>
+</li>
+<li>
+<span class="feature">Кофейни</span>
+<span class="check pull-right"> от 3</span>
+</li>
+<li>
+<span class="feature">Пользователи</span>
+<span class="check pull-right">от 10</span>
+</li>        </ul>
+<a class="order" href="#">Выбрать</a>
+
+</div>
+
+
+<div class="pricing wow fadeInLeft table-3 animated" data-wow-offset="400" data-wow-delay=".2s" style="visibility: visible;-webkit-animation-delay: .2s; -moz-animation-delay: .2s; animation-delay: .2s;">
+<h3>Business</h3>
+<div class="price-container ">
+<div class="col-md-12 dollar">$60</div>
+<div class="col-md-12 per-month">/ MONTH</div>
+</div>
+<em class="detail-price">Little description about this.</em>
+<ul class="price-features">
+<li>
+<span class="feature">Feature #1</span>
+<span class="check icon-checkmark"></span>
+</li>
+<li>
+<span class="feature">Feature #2</span>
+<span class="check icon-checkmark"></span>
+</li>
+<li>
+<span class="feature">Feature #3</span>
+<span class="check icon-checkmark"></span>
+</li>
+<li>
+<span class="feature">Feature #4</span>
+<span class="cross icon-cross"></span>
+</li>
+</ul>
+<a class="order" href="#">Order Now!</a>
+
+</div>
+</div>
+<!-----если залогинен конец---->
+
+<hr>
+<small class="pull-right" style="color:#888888;"><br/>MOKKO CRM · 2026&nbsp;&nbsp;&nbsp;</small>
+</div>
+
+<div class="darkness"></div>
+
+
+
+
+
+
+<div id="pageloader">
+<div class="loader-item fa fa-spin colored-border"></div>
+</div>
+
+
+<div id="microloader">
+<div class="loader-item fa fa-spin colored-border"></div>
+</div>
+
+<div id="miniloader">
+<div class="loader-item fa fa-spin colored-border"></div>
+</div>
+
+<script src="<?= BASE_PATH ?>/js/offline.js"></script>
+<script src="<?= BASE_PATH ?>/js/chartist.js"></script>
+<script src="<?= BASE_PATH ?>/js/jquery.cookie.js"></script>
+<script src="<?= BASE_PATH ?>/js/moment.js"></script>
+<script src="<?= BASE_PATH ?>/js/date.js"></script>
+
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/crm.js?ver=8"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/interface.js"></script>
+
+<? require_once('metrika.php'); ?>
+
+
+</body>
+</html>

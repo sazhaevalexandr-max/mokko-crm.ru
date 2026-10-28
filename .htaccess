@@ -1,0 +1,66 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# MOKKO CRM — конфигурация Apache
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Каталоги не листаем, симлинки не разрешаем без необходимости.
+Options -Indexes +FollowSymLinks
+DirectoryIndex index.php index.html
+
+# ── Security-заголовки ──────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+</IfModule>
+
+# ── Ошибки PHP не показываем посетителю ─────────────────────────────────────
+<IfModule mod_php7.c>
+    php_flag display_errors Off
+    php_flag display_startup_errors Off
+    php_flag log_errors On
+</IfModule>
+
+# ── Запрет доступа к служебным/резервным файлам ─────────────────────────────
+<FilesMatch "(^\.|~$|\.(bak|old|orig|save|swp|swo|tmp|sql|log|ini|env|dist|lock)$|\.html-$|^composer\.(json|lock)$|^README.*$|^SECURITY.*$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ── Маршрутизация ───────────────────────────────────────────────────────────
+RewriteEngine On
+RewriteBase /mokko-crm.ru
+
+# Remove trailing slashes (skip directories)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} ^(.+)/$
+RewriteRule ^(.+)/$ $1 [R=301,L]
+
+# Skip rewriting for existing files and directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route friendly URLs to index.php
+RewriteRule ^subscribe$   index.php?view=subscribe [L]
+RewriteRule ^login$       index.php?view=login     [L]
+RewriteRule ^login_dev$   index.php?view=login     [L]
+RewriteRule ^panel$       index.php?view=panel     [L,QSA]
+RewriteRule ^crm$         index.php?view=crm       [L,QSA]
+RewriteRule ^enter$       index.php?view=enter     [L,QSA]
+RewriteRule ^repair$      index.php?view=password  [L]
+RewriteRule ^password$    index.php?view=password  [L]
+RewriteRule ^signup$      index.php?view=signup    [L]
+
+ErrorDocument 404 /mokko-crm.ru/404.html
+ErrorDocument 403 /mokko-crm.ru/404.html
+ErrorDocument 500 /mokko-crm.ru/404.html
+ErrorDocument 503 /mokko-crm.ru/404.html
