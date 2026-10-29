@@ -3,7 +3,7 @@
 
 <div class="section-head">
     <h2>Настройки</h2>
-    <p>Профиль владельца аккаунта, вход и баланс.</p>
+    <p>Профиль владельца аккаунта и вход.</p>
 </div>
 
 <div class="settings-grid">
@@ -27,6 +27,13 @@
         </div>
         <div class="set-row">
             <div class="set-main">
+                <span class="set-label">Почта для связи</span>
+                <a class="set-value settings-mail" href="mailto:mokkocrm@yahoo.com">mokkocrm@yahoo.com</a>
+            </div>
+            <span class="set-note">Поддержка проекта</span>
+        </div>
+        <div class="set-row">
+            <div class="set-main">
                 <span class="set-label">Телефон</span>
                 <span class="set-value set_phone is-empty">Не указан</span>
             </div>
@@ -47,12 +54,10 @@
     </section>
 
     <section class="settings-card">
-        <header class="settings-card-head"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M16.5 14.5h1.5"/><path d="M6 6l9.5-2.7a1.5 1.5 0 0 1 1.9 1.4V6"/></svg><h3>Баланс</h3></header>
-        <div class="set-balance">
-            <span class="set-balance-sum"><b class="wallet_value">0</b> ₽</span>
-            <span class="set-status" data-status="">Статус загружается</span>
-        </div>
-        <p class="set-hint">Онлайн-пополнение временно недоступно. Чтобы пополнить баланс, напишите в поддержку — укажите e-mail аккаунта.</p>
+        <header class="settings-card-head"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 8.6c0 5.2-8.8 10.4-8.8 10.4S3.2 13.8 3.2 8.6A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8.8 1.6z"/></svg><h3>Поддержать проект</h3></header>
+        <p class="set-support-copy">MOKKO CRM — некоммерческий проект. Донаты помогают окупать разработку в свободное время и выпускать новые модули и обновления. Любая поддержка важна.</p>
+        <a class="btn btn-primary set-support-btn" href="https://boosty.to/alexandr220/donate" target="_blank" rel="noopener noreferrer">Поддержать на Boosty</a>
+        <p class="set-support-note">Это не оплата подписки — просто поддержка автора.</p>
     </section>
 
     <section class="settings-card settings-card--wide">
@@ -61,6 +66,11 @@
         <div class="settings-places"><p class="set-empty">Загрузка…</p></div>
     </section>
 
+</div>
+
+<div class="settings-build">
+    <span>Версия сборки</span>
+    <b>RC <?= mokko_h(MOKKO_VERSION) ?></b>
 </div>
 
 </div>

@@ -91,6 +91,14 @@ $(document).ready(function($) {
                       success: callback,
                       error: function(jqXHR, status) {
                           console.error('ajax_get error:', url, status);
+                          $('#pageloader').hide();
+                          // После переустановки/сброса базы старая сессия становится
+                          // недействительной. Не держим пользователя на экране
+                          // загрузки с общей ошибкой — отправляем на вход.
+                          if (jqXHR && (jqXHR.status === 401 || jqXHR.status === 403)) {
+                              window.location.href = BASE_URL + '/login';
+                              return;
+                          }
                           toaster('Нет ответа от сервера');
                       }
                   });
@@ -681,7 +689,7 @@ ajax_get('api:///stat/staff/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","pl
                   var final_days = window.final_days;
                   var final_crap = window.final_crap;
                   
-                  // Графики — свои SVG в стиле сайта (js/charts.js), вместо Google Charts
+                  // Графики — свои SVG в стиле сайта (js/charts.js)
                   if (window.MokkoCharts) {
                       MokkoCharts.donut(document.getElementById('piechart'), final_crap);
                       MokkoCharts.days(document.getElementById('staff_chart'), final_days);

@@ -116,7 +116,7 @@ SVG;
 <meta name="robots" content="noindex,nofollow">
 <title>MOKKO CRM — обновления</title>
 <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>/images/brand/favicon.svg?v=2">
-<link href="<?= BASE_PATH ?>/css/updates.css?v=2" rel="stylesheet">
+<link href="<?= BASE_PATH ?>/css/updates.css?v=3" rel="stylesheet">
 </head>
 <body class="upd-body">
 
@@ -233,11 +233,18 @@ SVG;
                     <?php if ($state['secret']): ?>
                         <span class="upd-badge upd-badge--ok">ключ задан</span>
                         <span class="upd-hint" style="margin:0">Сборка: <code>php tools/build-update.php src dist.zip</code></span>
+                        <form method="post" action="<?= mokko_h(BASE_PATH) ?>/api/updates.php?action=secret_download" class="upd-dl-form">
+                            <input type="hidden" name="csrf" value="<?= mokko_h($csrf) ?>">
+                            <button type="submit" class="upd-btn">Скачать ключ</button>
+                        </form>
                     <?php else: ?>
                         <span class="upd-badge">ключ не задан</span>
                         <button type="button" class="upd-btn" id="secret-create">Создать ключ</button>
                     <?php endif; ?>
                 </div>
+                <?php if ($state['secret']): ?>
+                <div class="upd-hint" style="margin-top:10px">Скачайте ключ и передайте его автору пакетов. Не публикуйте ключ в открытом доступе.</div>
+                <?php endif; ?>
             </div>
 
         </div>

@@ -50,6 +50,5 @@ var sid = <?= mokko_js(isset($_SESSION['sid']) ? (string)$_SESSION['sid'] : '') 
 </div>
 
 <script type="text/javascript" src="<?= mokko_h(BASE_PATH) ?>/js/select_place.js?v=2"></script>
-<?php require_once __DIR__ . '/metrika.php'; ?>
 </body>
 </html>

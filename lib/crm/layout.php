@@ -10,7 +10,7 @@
 <meta charset="utf-8">
 
 <meta name="description" content="сrm erp для автоматизации кофейни">
-<meta name="keywords" content="site, google, internet">
+<meta name="keywords" content="site, crm">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="robots" content="index,follow">
 
@@ -37,12 +37,14 @@
 <link rel="stylesheet" href="<?= BASE_PATH ?>/css/offline-theme-slide.css" />
 <link rel="stylesheet" href="<?= BASE_PATH ?>/css/offline-language-english.css" />
 
-<link href="<?= BASE_PATH ?>/css/theme.css?v=53" rel="stylesheet">
+<link href="<?= BASE_PATH ?>/css/theme.css?v=59" rel="stylesheet">
 
 <style type="text/css">
 .jconfirm.jconfirm-white .jconfirm-bg {
     background-color: rgba(5, 7, 10, .72);
 }
+/* Касса: контент занимает всю ширину после сайдбара (в панели остаётся 1120px) */
+body.crm-page .bg-light > .row > .c2 { max-width: none !important; }
 </style>
 
 <meta property="og:title" content="MOKKO CRM" />
@@ -67,9 +69,6 @@ var place = <?= mokko_js(isset($_SESSION['place']) ? (string)$_SESSION['place'] 
 
 
 <nav class="navbar navbar-default navbar-fixed-top fixed-top usertop" role="navigation">
-
-<!--
-<img class="navbar-toggle collapsed pull_right ham"  data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false" src="../images/ham.png?ver=0.2" />-->
 
     <ul class="nav navbar-nav">
         <li class="nav-item brand-nav">

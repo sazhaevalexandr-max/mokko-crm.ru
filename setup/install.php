@@ -108,6 +108,28 @@ input:focus { outline: 1px dotted #000; outline-offset: -3px; }
 .row > div { flex: 1; min-width: 0; }
 .row .narrow { flex: 0 0 110px; }
 .hint { margin-top: 3px; font: 10px Tahoma, sans-serif; color: #555; line-height: 1.4; }
+.agreement-scroll {
+    max-height: 250px;
+    overflow: auto;
+    padding: 9px 11px;
+    background: #fff;
+    border: 2px inset #d4d0c8;
+    font: 11px Tahoma, sans-serif;
+    line-height: 1.5;
+    color: #222;
+}
+.agreement-scroll p { margin: 0 0 8px; }
+.agreement-scroll p:last-child { margin-bottom: 0; }
+.agreement-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin: 10px 0 0;
+    font: 11px Tahoma, sans-serif;
+    line-height: 1.45;
+    color: #000;
+}
+.agreement-check input { flex: 0 0 auto; margin: 2px 0 0; }
 code { font: 10px "Courier New", monospace; background: #f0ede6; border: 1px solid #d8d3c8; padding: 0 3px; }
 
 .status {
@@ -341,6 +363,7 @@ $in = array(
     'admin_email' => '',
     'admin_pass'  => '',
     'token'       => '',
+    'agreement'   => '',
 );
 $generatedPass = '';
 $domain = preg_replace('/:\d+$/', '', mokko_host());
@@ -353,7 +376,10 @@ if ($isPost) {
     }
 
     if (!hash_equals($installKey, $in['token'])) {
-        $errors[] = 'Неверный ключ установки. Он указан в файле setup/install.key и в вашей лицензии.';
+        $errors[] = 'Неверный ключ установки.';
+    }
+    if ($in['agreement'] !== '1') {
+        $errors[] = 'Подтвердите согласие с условиями использования.';
     }
     if (!preg_match('/^[A-Za-z0-9_]+$/', $in['db_name'])) {
         $errors[] = 'Имя базы данных: только латинские буквы, цифры и подчёркивание.';
@@ -473,7 +499,7 @@ setup_header();
 
 <div class="side">
     <div class="disk"><?= setup_floppy_svg(118) ?></div>
-    <div class="side-cap">Установочный диск<br><b>MOKKO CRM</b><br>версия 1.0</div>
+    <div class="side-cap">Установочный диск<br><b>MOKKO CRM</b><br>версия RC 1.0</div>
 
     <ol class="steps">
         <li class="on"><b>1</b><span>Сервер и база</span></li>
@@ -542,9 +568,26 @@ setup_header();
 
         <div class="group">
             <div class="group-title">3. Ключ установки</div>
-            <label class="first" for="token">Ключ из лицензии</label>
-            <input id="token" type="text" name="token" value="<?= mokko_h($in['token']) ?>" autocomplete="off">
-            <div class="hint">Указан в файле <code>setup/install.key</code> и передаётся вместе с копией.</div>
+             <input id="token" type="text" name="token" value="<?= mokko_h($in['token']) ?>" autocomplete="off">
+            <div class="hint">Передаётся вместе с копией и он нужен для подписи обновлений именно вашей копии. Без него вы, вероятно, не сможете получать свежие обновления и устанавливать модули.</div>
+        </div>
+
+        <div class="group">
+            <div class="group-title">Соглашение</div>
+            <div class="agreement-scroll">
+                <p><b>Важная информация перед установкой</b></p>
+                <p>Устанавливая и используя данное программное обеспечение, вы подтверждаете, что ознакомились с настоящим уведомлением и принимаете его условия.</p>
+                <p>Программное обеспечение предоставляется бесплатно и исключительно для некоммерческого использования. Любое коммерческое использование, распространение в коммерческих целях, а также использование для извлечения прибыли возможно только при наличии отдельного письменного разрешения правообладателя.</p>
+                <p>Программное обеспечение предоставляется по принципу «как есть» (as is), без каких-либо гарантий — явных или подразумеваемых, включая, но не ограничиваясь, гарантии пригодности для конкретной цели, отсутствия ошибок, бесперебойной работы, безопасности или соответствия вашим ожиданиям.</p>
+                <p>Вы самостоятельно принимаете на себя все риски, связанные с установкой, настройкой, использованием или невозможностью использования данного программного обеспечения, включая возможные сбои, потерю, повреждение или утечку данных, а также любые другие прямые или косвенные убытки.</p>
+                <p>Правообладатель не несет ответственности за любой ущерб, возникший в результате использования или ненадлежащего использования программного обеспечения, в максимальной степени, допускаемой применимым законодательством.</p>
+                <p>Если вы не согласны с настоящими условиями, не устанавливайте и не используйте данное программное обеспечение.</p>
+                <p>Нажимая «Установить», «Далее» или «Принять», вы подтверждаете свое согласие с указанными условиями.</p>
+            </div>
+            <label class="agreement-check" for="agreement">
+                <input id="agreement" type="checkbox" name="agreement" value="1"<?= $in['agreement'] === '1' ? ' checked' : '' ?> required>
+                <span>Я подтверждаю, что использую программу исключительно в некоммерческих целях, понимаю, что она предоставляется «как есть» без гарантий, и принимаю на себя все риски её использования.</span>
+            </label>
         </div>
 
         <div class="actions">

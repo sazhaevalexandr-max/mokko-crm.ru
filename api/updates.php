@@ -281,6 +281,26 @@ try {
             ));
             break;
 
+        case 'secret_download':
+            // Ключ подписи — секрет. Отдаём его только администратору,
+            // POST-запросом и после проверки CSRF (для скачивания токен
+            // приходит в скрытом поле формы, а не заголовком).
+            $csrf = isset($_POST['csrf']) ? (string)$_POST['csrf'] : null;
+            if (!mokko_csrf_valid($csrf)) {
+                mokko_upd_api_error('Неверный CSRF-токен. Обновите страницу.', 403);
+            }
+            $secret = mokko_upd_secret();
+            if ($secret === null) {
+                mokko_upd_api_error('Ключ подписи не найден.', 404);
+            }
+            mokko_log('updates: secret downloaded by uid=' . $uid);
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="update.secret"');
+            header('Content-Length: ' . strlen($secret . "\n"));
+            header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+            echo $secret . "\n";
+            exit;
+
         default:
             mokko_upd_api_error('Неизвестное действие.', 404);
     }

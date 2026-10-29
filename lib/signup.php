@@ -10,7 +10,7 @@
 <title>Создание аккаунта — MOKKO CRM</title>
 <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>/images/brand/favicon.svg?v=2">
 <link href="<?= BASE_PATH ?>/css/bootstrap-4.6.2.min.css" rel="stylesheet">
-<link href="<?= BASE_PATH ?>/css/theme.css?v=34" rel="stylesheet">
+<link href="<?= BASE_PATH ?>/css/theme.css?v=54" rel="stylesheet">
 <script>var BASE_URL = <?= mokko_js(BASE_URL) ?>;</script>
 </head>
 
@@ -106,7 +106,8 @@
 
 </main>
 
-<p class="auth-copy signup-copy">&copy; MOKKO CRM, 2026</p>
+<?php require_once __DIR__ . '/copyright.php'; ?>
+<p class="auth-copy signup-copy"><?= mokko_copyright() ?></p>
 
 <script>
 (function () {

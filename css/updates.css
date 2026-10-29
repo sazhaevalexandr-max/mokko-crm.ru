@@ -226,6 +226,7 @@ code {
 .upd-check input { margin: 1px 0 0; flex: none; }
 
 .upd-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.upd-dl-form { display: inline-flex; margin: 0; }
 
 /* ── Кнопки ──────────────────────────────────────────────────────────────── */
 

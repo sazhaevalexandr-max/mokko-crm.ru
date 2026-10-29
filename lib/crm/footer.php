@@ -161,8 +161,9 @@ $(document).ready(function() {
 </div>
 <!-----если залогинен конец---->
 
+<?php require_once __DIR__ . '/../copyright.php'; ?>
 <hr>
-<small class="app-foot">MOKKO CRM, 2026</small>
+<small class="app-foot"><?= mokko_copyright() ?></small>
 </div>
 
 <div class="darkness"></div>
@@ -172,8 +173,15 @@ $(document).ready(function() {
 
 
 
-<div id="pageloader">
-<div class="loader-item fa fa-spin colored-border"></div>
+<div id="pageloader" role="status" aria-live="polite" aria-label="Загрузка">
+<div class="mk-page-loader">
+<div class="mk-page-loader-brand">
+<img src="<?= BASE_PATH ?>/images/brand/wordmark-sm.svg?v=1" alt="" width="150" height="32">
+<span>CRM</span>
+</div>
+<span class="mk-page-loader-ring" aria-hidden="true"></span>
+<span class="mk-page-loader-text">Загружаем рабочее место…</span>
+</div>
 </div>
 
 
@@ -195,9 +203,8 @@ $(document).ready(function() {
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/order.js?ver=1"></script>
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/crm.js?ver=25"></script>
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/interface.js?ver=5"></script>
-<script type="text/javascript" src="<?= BASE_PATH ?>/js/pet.js?ver=5"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/pet.js?ver=13"></script>
 
-<?php require_once dirname(__DIR__) . '/metrika.php'; ?>
 
 
 </body>

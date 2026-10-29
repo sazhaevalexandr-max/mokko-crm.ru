@@ -16,7 +16,8 @@
 
 
 
-<small class="app-foot">MOKKO CRM, 2026</small>
+<?php require_once __DIR__ . '/../copyright.php'; ?>
+<small class="app-foot"><?= mokko_copyright() ?></small>
 <script>
 $(document).ready(function() {
                   
@@ -100,9 +101,15 @@ $(document).ready(function() {
 
 
 
-<div id="pageloader">
-    <h3 style="font-size: 60px;font-weight: 800;text-align: center;color: #1f9eda;">MOKKO CRM<br><small>загрузка...</small></h3>
-    <div class="loader-item fa fa-spin colored-border"></div>
+<div id="pageloader" role="status" aria-live="polite" aria-label="Загрузка">
+    <div class="mk-page-loader">
+        <div class="mk-page-loader-brand">
+            <img src="<?= BASE_PATH ?>/images/brand/wordmark-sm.svg?v=1" alt="" width="150" height="32">
+            <span>CRM</span>
+        </div>
+        <span class="mk-page-loader-ring" aria-hidden="true"></span>
+        <span class="mk-page-loader-text">Загружаем рабочее место…</span>
+    </div>
 </div>
 <div id="microloader">
     <div class="loader-item fa fa-spin colored-border"></div>
@@ -114,21 +121,34 @@ $(document).ready(function() {
 <script src="<?= BASE_PATH ?>/js/moment.js"></script>
 <script src="<?= BASE_PATH ?>/js/date.format.js"></script>
 
-<!-- Google Charts больше не нужен: графики рисует js/charts.js -->
-<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/charts.js?v=1"></script>
 
 
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/api.js?v=1"></script>
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/panel/helpers.js?v=1"></script>
-<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel.js?ver=24"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel.js?ver=25"></script>
+
+<script type="text/javascript">
+// Мобильный бургер: клик по любому пункту меню закрывает список.
+// Вешаем прямо на ссылки (а не делегатом на document): обработчик .navigation a
+// в panel.js делает return false (= stopPropagation), и делегат бы не сработал.
+// Обработчики на одном элементе выполняются все, stopPropagation их не блокирует.
+(function ($) {
+    $(function () {
+        $('#bs-example-navbar-collapse-1 a').on('click', function () {
+            if ($('.panel-menu-toggle').is(':visible')) {
+                $('#bs-example-navbar-collapse-1').collapse('hide');
+            }
+        });
+    });
+})(window.jQuery);
+</script>
 
 
 
 
 
 
-<?php require_once dirname(__DIR__) . '/metrika.php'; ?>
 
 <?php mokko_hook('panel.footer'); ?>
 

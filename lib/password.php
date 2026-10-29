@@ -44,7 +44,7 @@ if (!defined('MOKKO')) {
         </p>
 
         <p style="margin:22px 0 6px;">
-            <a class="btn btn-primary" href="mailto:info@mokko-crm.ru">Написать в поддержку</a>
+            <a class="btn btn-primary" href="mailto:mokkocrm@yahoo.com">Написать в поддержку</a>
             <a class="btn btn-default" href="<?= mokko_h(BASE_URL) ?>/login">Вернуться к входу</a>
         </p>
     </div>
