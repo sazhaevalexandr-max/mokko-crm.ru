@@ -77,7 +77,7 @@ VK.Widgets.CommunityMessages("vk_community_messages", 40968365, {});
     
     </div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="<?= BASE_PATH ?>/js/jquery-1.11.1.min.js?v=1"></script>
     <script src="<?= BASE_PATH ?>/js/bootstrap-4.6.2.bundle.min.js"></script>
     <script src="<?= BASE_PATH ?>/js/theme.js?v=14"></script>
 <script>
@@ -144,7 +144,7 @@ $(".phone").keydown(function(event) {
 </script>
 <!-- Yandex.Metrika counter -->
 <?php
-    include('./lib/metrika.php');
+    include __DIR__ . '/metrika.php';
 ?>
 <!-- /Yandex.Metrika counter -->
     </body>

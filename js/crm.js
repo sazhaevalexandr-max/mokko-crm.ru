@@ -1,27 +1,9 @@
 
-// ── Local API shim ────────────────────────────────────────────────────────────
-if (typeof BASE_URL === 'undefined') { var BASE_URL = ''; }
 
-$.ajaxPrefilter(function(options) {
-    var url = options.url || '';
-    if (url.indexOf('mokkoapi.azurewebsites.net') < 0) return;
-    var path = url.replace(/^https?:\/\/mokkoapi\.azurewebsites\.net\//, '');
-    var jsonStart = path.indexOf('{');
-    var pathPart  = jsonStart >= 0 ? path.substring(0, jsonStart) : path;
-    var jsonPart  = jsonStart >= 0 ? path.substring(jsonStart)    : '{}';
-    pathPart = pathPart.replace(/\/$/, '');
-    var parts  = pathPart.split('/').filter(function(x){ return x; });
-    var module = parts[0] || '';
-    var action = parts[1] || 'get';
-    var params;
-    try { params = JSON.parse(decodeURIComponent(jsonPart)); } catch(e) { params = {}; }
-    options.type        = 'POST';
-    options.url         = BASE_URL + '/api/crm.php?module=' + encodeURIComponent(module) + '&action=' + encodeURIComponent(action);
-    options.contentType = 'application/json';
-    options.data        = JSON.stringify(params);
-    options.dataType    = 'json';
-});
-// ── End shim ──────────────────────────────────────────────────────────────────
+// Явные переменные, которые раньше создавались неявно внутри функций.
+// Убирает загрязнение window и готовит файл к strict mode / переводу в модуль.
+// (check вынесен в модуль заказа order.js — см. order.collect / collectForPayment.)
+var month, date_time, load_id;
 
 // ── Таймер смены ────────────────────────────────────────────────────────────
 // Время считается от момента начала смены, а не прибавлением секунд:
@@ -99,7 +81,7 @@ function clock() {
         document.layers.doc_time.document.close();
     }
     else document.getElementById("doc_time").innerHTML = date_time;
-    setTimeout("clock()", 1000);
+    setTimeout(clock, 1000);
 }
 ///clock();
 
@@ -166,7 +148,7 @@ $(document).ready(function($) {
                   
 				   $.ajax({
                          type: 'GET',
-                         url: 'http://mokkoapi.azurewebsites.net/startshift/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place": "'+place+'"}',
+                         url: 'api:///startshift/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place": "'+place+'"}',
                          success: function(data){
 						 if (data && data.error) { console.error('startshift:', data.error); shiftSetup(); return; }
 						 window.shift = data.id;
@@ -183,14 +165,11 @@ $(document).ready(function($) {
                   
           
                                    if ($(window).width() <= '900'){
-                                                $('.maximize').removeClass('maximize').addClass('minimize');
                                                 $('.total_summ').addClass('fixed');
-                                               // var total_summ_div = $('.total_summ').clone();
-                  $('.minimize').remove();
-                                                $('.total_summ').appendTo(".main");
-                                   
-                  
-                  }
+                                                // Новая кнопка закрепления не удаляется старым кодом.
+                                                $('.total_summ .bill-pin-label').text('Закрепить');
+                                                $('body').append($('.total_summ'));
+                   }
                   
                                    
                                    
@@ -349,28 +328,14 @@ $(document).ready(function($) {
                   var id_guest = $('#guest_form input[name="id_guest"]').val();
 
                   var activeguest = window.guest_id;
-                  var bays = $('.zakaz').find('li');
-                  payed = [];
-                  $.each( bays, function( i, el ) {
-                         var id_item = Number($(el).attr('item_id'));
-                         var qulity = Number($(el).find('b').text());
-                         if(qulity==''){
-                         qulity = 1;
-                         }
-                         check = [];
-                         check.item = Number(id_item);
-                         check.qulity = Number(qulity);
-                         check.uid = activeguest;
-                         check.push(check.item,check.qulity,check.uid);
-                         payed.push(check)
-                         });
+                  payed = order.collect(activeguest);
 
                   var price = Number($('.total_summ .sum').text());
 
                   if(activeguest !== undefined && payed.length > 0){
                       $.ajax({
                              type: 'GET',
-                             url: 'http://mokkoapi.azurewebsites.net/guests/edit/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","id":"'+activeguest+'","place": "'+place+'","items":"'+JSON.stringify(payed)+'","price":"'+price+'"}',
+                             url: 'api:///guests/edit/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","id":"'+activeguest+'","place": "'+place+'","items":"'+JSON.stringify(payed)+'","price":"'+price+'"}',
                              success: function(data){
                                  console.log('saved bill', activeguest, data);
                                  the_new_guest(name);
@@ -404,10 +369,10 @@ $(document).ready(function($) {
                   var name = '';
                   }
 				  console.log("ADD_GUEST");
-				 // alert('http://mokkoapi.azurewebsites.net/guests/new/{"uid":"'+uid+'","sid":"'+sid+'","name" : "'+name+'", "key":"'+key+'","place": "'+place+'"}');
+				 // alert('api:///guests/new/{"uid":"'+uid+'","sid":"'+sid+'","name" : "'+name+'", "key":"'+key+'","place": "'+place+'"}');
                   $.ajax({
                          type: 'GET',
-                         url: 'http://mokkoapi.azurewebsites.net/guests/new/{"uid":"'+uid+'","sid":"'+sid+'","name" : "'+name+'", "key":"'+key+'","place": "'+place+'"}',
+                         url: 'api:///guests/new/{"uid":"'+uid+'","sid":"'+sid+'","name" : "'+name+'", "key":"'+key+'","place": "'+place+'"}',
                          success: function(data){
 							 
 						
@@ -455,7 +420,7 @@ $(document).ready(function($) {
                                //console.log(msg);
                                $.ajax({
                                       type: 'GET',
-                                      url: 'http://mokkoapi.azurewebsites.net/guests/update/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","id":"'+window.guest_id+'","name":"'+new_name+'"}',
+                                      url: 'api:///guests/update/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","id":"'+window.guest_id+'","name":"'+new_name+'"}',
                                       success: function(data){
                                       console.log(data);
                                       if(data!=='error'){
@@ -477,27 +442,12 @@ $(document).ready(function($) {
                   var name = $('a.name_guest').text();
                   var price = Number($('.total_summ .sum').text());
                   
-                  var bays = $('.zakaz').find('li');
-                  payed = [];
-                  $.each( bays, function( i, el ) {
-                         var id_item = Number($(el).attr('item_id'));
-                         var qulity = Number($(el).find('b').text());
-                         if(qulity==''){
-                         qulity = 1;
-                         }
-                         check = [];
-                         check.item = Number(id_item);
-                         check.qulity = Number(qulity);
-                         check.uid = id_guest;
-                         check.push(check.item,check.qulity,check.uid);
-                         payed.push(check)
-                         
-                    });
+                  payed = order.collect(id_guest);
                   
     if(id_guest!==undefined){
     $.ajax({
     type: 'GET',
-    url: 'http://mokkoapi.azurewebsites.net/guests/edit/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","id":"'+window.guest_id+'","place":"'+place+'","items":"'+JSON.stringify(payed)+'","price":"'+price+'"}',
+    url: 'api:///guests/edit/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","id":"'+window.guest_id+'","place":"'+place+'","items":"'+JSON.stringify(payed)+'","price":"'+price+'"}',
            success: function(data){
            console.log(data);
            }
@@ -512,7 +462,7 @@ $(document).ready(function($) {
 
                   $.ajax({
                          type: 'GET',
-                         url: 'http://mokkoapi.azurewebsites.net/guests/get/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'", "id": "'+id_guest+'"}',
+                         url: 'api:///guests/get/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'", "id": "'+id_guest+'"}',
                          success: function(data){
                            $('#microloader').css('display','none');
                          
@@ -626,7 +576,7 @@ $(document).ready(function($) {
                   function load_guests(){
                   $.ajax({
                          type: 'GET',
-                         url: 'http://mokkoapi.azurewebsites.net/guests/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'"}',
+                         url: 'api:///guests/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'"}',
 
                          success: function(data){
                        
@@ -705,7 +655,7 @@ $(document).ready(function($) {
                   
                   $.ajax({
                          type: 'GET',
-                         url: 'http://mokkoapi.azurewebsites.net/ini/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'"}',
+                         url: 'api:///ini/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'"}',
                          timeout:3000,
                          success: function(data) {
                          console.log(data);
@@ -756,7 +706,7 @@ $(document).ready(function($) {
                          }
 						 	 $.ajax({
                                 type: 'GET',
-                                url: 'http://mokkoapi.azurewebsites.net/places/get/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'"}',
+                                url: 'api:///places/get/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'"}',
                                 timeout:10000,
                                 success: function(data) {
 								console.log(data);
@@ -769,7 +719,7 @@ $(document).ready(function($) {
                          /*
                          $.ajax({
                                 type: 'GET',
-                                url: 'http://mokkoapi.azurewebsites.net/items/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","category":"all"}',
+                                url: 'api:///items/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","category":"all"}',
                                 timeout:10000,
                                 success: function(data) {
 									console.log(data);
@@ -802,7 +752,7 @@ $(document).ready(function($) {
                   $.ajax({
                          
                          type: 'GET',
-                         url: 'http://mokkoapi.azurewebsites.net/'+module+'/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'"}',
+                         url: 'api:///'+module+'/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'"}',
                          timeout:4000,
                          success: function(data) {
                          viewer(module,data);
@@ -894,7 +844,7 @@ $(document).ready(function($) {
                               $('.jconfirm .buttons button').prop('disabled', true);
                               $.ajax({
                                   type: 'GET',
-                                  url: 'http://mokkoapi.azurewebsites.net/staff/newpassword/' + JSON.stringify(payload).replace(/%/g, '%25'),
+                                  url: 'api:///staff/newpassword/' + JSON.stringify(payload).replace(/%/g, '%25'),
                                   timeout: 6000,
                                   success: function (data) {
                                       if (!data || data.error) {
@@ -941,7 +891,7 @@ $(document).ready(function($) {
                   function load_menu(){
                   $.ajax({
                          type: 'GET',
-                         url: 'http://mokkoapi.azurewebsites.net/category/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'"}',
+                         url: 'api:///category/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'"}',
                          success: function(data){
                          $(".filter_items").empty().append('<button type="button" show="all" class="btn btn-primary active">Все</button>');
                          var menus = data;
@@ -976,7 +926,7 @@ $(document).ready(function($) {
                   function load_items(type){
                   $.ajax({
                          type: 'GET',
-                         url: 'http://mokkoapi.azurewebsites.net/items/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","category":"'+type+'"}',
+                         url: 'api:///items/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","category":"'+type+'"}',
                          success: function(data){
                          $("#dash").empty();
                          var items = (typeof data === 'string') ? JSON.parse(data) : data;
@@ -1074,7 +1024,7 @@ $(document).ready(function($) {
                       // предупреждение об открытых счетах
                       $.ajax({
                           type: 'GET',
-                          url: 'http://mokkoapi.azurewebsites.net/guests/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'"}',
+                          url: 'api:///guests/load/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'"}',
                           success: function(data){
                               var list = (typeof data === 'string') ? JSON.parse(data) : data;
                               if (!$.isArray(list)) { return; }
@@ -1103,7 +1053,7 @@ $(document).ready(function($) {
 
                       $.ajax({
                           type: 'GET',
-                          url: 'http://mokkoapi.azurewebsites.net/shift/{"shift":"'+(window.shift || 0)+'","uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'","hours":'+t.h+',"min":'+t.m+',"sec":'+t.s+'}',
+                          url: 'api:///shift/{"shift":"'+(window.shift || 0)+'","uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'","hours":'+t.h+',"min":'+t.m+',"sec":'+t.s+'}',
                           timeout: 15000,
                           success: function(data){
                               data = (typeof data === 'string') ? JSON.parse(data) : data;
@@ -1256,8 +1206,6 @@ $(document).ready(function($) {
                   $('body').on('click','.oplata_btn.btn_big', function(){
 					  if(window.guest_id!==undefined){
                                               $(this).prop( "disabled", true );
-                                              var bays = $('.zakaz').find('li');
-                                              payed = [];
                                // ПЕЧАТЬ ЧЕКОВ ВРЕМЕННО ОТКЛЮЧЕНА — чтобы вернуть, раскомментируйте блок ниже (и блоки в окне «Начало смены»)
                                // if($.cookie('checkswitch') == 'on'){
                                // var list_zakaz = $('ul.zakaz').clone();
@@ -1266,36 +1214,12 @@ $(document).ready(function($) {
                                // $('.itogo_check').empty().append(total_check);
                                               // window.print();
                                // }
-                                              $.each( bays, function( i, el ) {
-                                                     var id_item = $(el).attr('item_id');
-                                                     var qulity = $(el).find('b').text();
-                                                     var price = $(el).find('strong').text();
-                                                     if(qulity==''){
-                                                     qulity = 1;
-                                                     }
-                                                     var pay_method = $('#pay').find('.active a').attr('href');
-                                                     var pay_method = pay_method.replace("#","");
-                                                     if(pay_method == "cash"){
-                                                     pay_method = 1;
-                                                     }else if(pay_method == "card"){
-                                                     pay_method = 2;
-                                                     }
-                                                     check = [];
-                                                     check.item = Number(id_item);
-                                                     check.qulity = Number(qulity);
-                                                     check.uid = Number(window.guest_id);
-                                                     check.method = pay_method;
-                                                     check.price = price;
-                                                     check.push(check.item,check.qulity,check.uid,check.method,check.price);
-                                                     payed.push(check)
-                                                     console.log(JSON.stringify(check));
-                                                     ///payed.push(check);
-                                                     });
+                                              payed = order.collectForPayment(Number(window.guest_id));
                                var totaly_sum = $('.total_summ .sum').text();
-                          console.log( 'http://mokkoapi.azurewebsites.net/buy/check/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'","payed":'+JSON.stringify(payed)+',"total":'+totaly_sum+',"shift":'+window.shift+'}');
+                          console.log( 'api:///buy/check/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'","payed":'+JSON.stringify(payed)+',"total":'+totaly_sum+',"shift":'+window.shift+'}');
                                               $.ajax({
                                                      type: 'GET',
-                                                     url: 'http://mokkoapi.azurewebsites.net/buy/check/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'","payed":'+JSON.stringify(payed)+',"total":'+totaly_sum+',"shift":'+window.shift+'}',
+                                                     url: 'api:///buy/check/{"uid":"'+uid+'","sid":"'+sid+'","key":"'+key+'","place":"'+place+'","payed":'+JSON.stringify(payed)+',"total":'+totaly_sum+',"shift":'+window.shift+'}',
                                                      success: function(data){
                                                      console.log(JSON.stringify(data));
                                                      //active_guest(window.guest_id);

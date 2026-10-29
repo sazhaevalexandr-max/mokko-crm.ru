@@ -2,13 +2,17 @@
 /**
  * MOKKO CRM — единая точка входа.
  *
- * Безопасность:
- *  - сессия стартует только с безопасными атрибутами cookie;
- *  - никакого «входа» через GET/POST-параметры (удалён старый баг
- *    ?access=...&uid=...&sid=..., позволявший войти под любым uid);
- *  - подключаемые шаблоны — только из белого списка;
- *  - ошибки не показываются посетителю.
+ * Bootstrapping (сессия, заголовки, установка, обслуживание) остаётся здесь,
+ * а маршрутизация и страницы вынесены в app/ и config/routes.php.
+ *
+ * Раздел /updates намеренно не проходит через новый роутер: модуль обновлений
+ * должен оставаться самостоятельным и не зависеть от app/.
  */
+
+use Mokko\Controllers\AuthController;
+use Mokko\Controllers\PageController;
+use Mokko\Http\Request;
+use Mokko\Http\Router;
 
 define('MOKKO', true);
 
@@ -26,15 +30,13 @@ define('BASE_PATH', $base);
 define('BASE_URL', (mokko_is_https() ? 'https' : 'http') . '://' . mokko_host() . $base);
 unset($base);
 
-// Система ещё не установлена (нет базы, таблиц или пользователей) —
-// не показываем интерфейс с ошибками БД, а сразу ведём в установщик.
+// Система ещё не установлена — ведём в установщик.
 if (!mokko_is_installed()) {
     header('Location: ' . BASE_URL . '/setup/install.php');
     exit;
 }
 
-// Режим обслуживания на время обновления: администратору сайт доступен,
-// остальные видят 503 вместо полуобновлённого интерфейса.
+// Режим обслуживания: администратору сайт доступен, остальные видят 503.
 if (mokko_in_maintenance() && !mokko_is_admin_session()) {
     http_response_code(503);
     header('Retry-After: 120');
@@ -56,141 +58,29 @@ if (mokko_in_maintenance() && !mokko_is_admin_session()) {
 require_once __DIR__ . '/lib/modules.php';
 mokko_modules_boot();
 
-/**
- * Нормализация пользовательской строки.
- * ВАЖНО: для SQL всегда используются prepared statements, эта функция
- * больше не «защищает» от инъекций (addslashes был вредным).
- */
-function clean($val)
-{
-    return mokko_str($val, 255);
-}
-
-/**
- * Рендер шаблона из lib/ по белому списку.
- */
-function mokko_render($view)
-{
-    static $allowed = array(
-        'subscribe', 'panel', 'login', 'signup',
-        'password', 'crm', 'enter', 'select_place',
-    );
-    if (!in_array($view, $allowed, true)) {
-        return;
-    }
-    require __DIR__ . '/lib/' . $view . '.php';
-}
-
 $view = isset($_GET['view']) && is_string($_GET['view']) ? $_GET['view'] : '';
 
-if ($view !== '') {
-    switch ($view) {
-        case 'subscribe':
-            mokko_render('subscribe');
-            break;
-
-        case 'panel':
-            if (mokko_is_authenticated() && (isset($_SESSION['sid']) && $_SESSION['sid'] === 'uid')) {
-                mokko_render('panel');
-            } elseif (mokko_is_authenticated()) {
-                header('Location: ' . BASE_URL . '/crm');
-                exit;
-            } else {
-                header('Location: ' . BASE_URL . '/login');
-                exit;
-            }
-            break;
-
-        case 'updates':
-            if (mokko_is_admin_session()) {
-                require __DIR__ . '/lib/updates.php';
-            } else {
-                header('Location: ' . BASE_URL . '/login');
-            }
-            break;
-
-        case 'login':
-            if (mokko_is_authenticated()) {
-                header('Location: ' . BASE_URL . '/panel');
-                exit;
-            }
-            mokko_render($view);
-            break;
-
-        // Коробочная версия: регистрация отключена — администратор создаётся
-        // установщиком (один на копию). Страница lib/signup.php сохранена, но
-        // не открывается: заход на /signup перенаправляется на вход. Чтобы
-        // вернуть регистрацию — верните 'signup' в case 'login' выше,
-        // раскомментируйте ссылку на странице входа и гейт в api/auth.php.
-        case 'signup':
-            header('Location: ' . BASE_URL . '/login');
-            exit;
-            break;
-
-        case 'password':
-            if (mokko_is_authenticated()) {
-                header('Location: ' . BASE_URL . '/panel');
-                exit;
-            }
-            mokko_render('password');
-            break;
-
-        case 'crm':
-            if (mokko_is_authenticated() && isset($_SESSION['place'])) {
-                mokko_render('crm');
-            } else {
-                header('Location: ' . BASE_URL . '/enter');
-                exit;
-            }
-            break;
-
-        case 'enter':
-            if (!mokko_is_authenticated()) {
-                header('Location: ' . BASE_URL . '/login');
-                exit;
-            }
-            if (isset($_GET['place'])) {
-                $place = (int)$_GET['place'];
-                require_once __DIR__ . '/config/db.php';
-                // Кофейня должна принадлежать текущему пользователю: иначе
-                // ?place=1 переключал интерфейс на чужую точку.
-                $chk = getDB()->prepare('SELECT id FROM places WHERE id = ? AND user_id = ? LIMIT 1');
-                $chk->execute(array($place, (int)$_SESSION['uid']));
-                if ($chk->fetchColumn()) {
-                    $_SESSION['place'] = $place;
-                }
-                header('Location: ' . BASE_URL . (!empty($_SESSION['place']) ? '/crm' : '/enter'));
-                exit;
-            }
-            mokko_render('select_place');
-            break;
-
-        default:
-            require __DIR__ . '/lib/main.php';
+// ── Модуль обновлений: отдельная ветка, не связанная с app/ ────────────────
+if ($view === 'updates') {
+    if (mokko_is_admin_session()) {
+        require __DIR__ . '/lib/updates.php';
+    } else {
+        header('Location: ' . BASE_URL . '/login');
     }
-} else {
-    require __DIR__ . '/lib/main.php';
+    exit;
 }
 
-// ── Действия ────────────────────────────────────────────────────────────────
-if (isset($_GET['do'])) {
-    switch ((string)$_GET['do']) {
-        case 'exit':
-            $_SESSION = array();
-            if (ini_get('session.use_cookies')) {
-                $params = session_get_cookie_params();
-                setcookie(
-                    session_name(),
-                    '',
-                    time() - 42000,
-                    isset($params['path']) ? $params['path'] : '/',
-                    isset($params['domain']) ? $params['domain'] : '',
-                    !empty($params['secure']),
-                    !empty($params['httponly'])
-                );
-            }
-            session_destroy();
-            header('Location: ' . BASE_URL . '/login');
-            exit;
-    }
+require_once __DIR__ . '/app/autoload.php';
+
+$request = Request::fromGlobals();
+
+// ── Выход ──────────────────────────────────────────────────────────────────
+if (isset($_GET['do']) && (string)$_GET['do'] === 'exit') {
+    (new AuthController())->logout($request)->send();
+    exit;
 }
+
+// ── Страницы ───────────────────────────────────────────────────────────────
+$routes = require __DIR__ . '/config/routes.php';
+$router = new Router($routes, array(new PageController(), 'home'));
+$router->dispatch($request)->send();

@@ -163,13 +163,10 @@ a.save_lager_item {
     border: none;
 }
 
-.lager_table tr{
+.lager_table tbody tr{
     display:none;
 }
-.lager_table span{
-    display:none;
-}
-.lager_table tr.enable{
+.lager_table tbody tr.enable{
     display: table-row;
     vertical-align: inherit;
 }
@@ -350,26 +347,6 @@ h2{
 }
 
 body{
-}
-.header a{
-    color:#fff;
-}
-.header{
-    padding-top: 20px;
-    color:#fff;
-    width:100%;
-    height:500px;
-    background:url(../images/bar.png);
-    background-size:cover;
-}
-.header h1,h2,h3,h4{
-    letter-spacing: 1px;
-    font-weight:200;
-}
-.header small{
-    color:#fff;
-    font-weight:100;
-    
 }
 .bg-light .row {
     margin-right: 0;

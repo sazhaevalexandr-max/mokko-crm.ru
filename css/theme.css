@@ -2007,6 +2007,9 @@ ul.zakaz b:before { color: var(--text-mute); }
     .crm-page .left_bar .menu_left { display: flex; gap: 8px; margin: 8px 10px; padding: 0; }
     .crm-page .left_bar .menu_left li { flex: 1; }
     .crm-page .left_bar .menu_left li a { text-align: center; padding: 9px 10px; }
+    /* На планшете/крупном телефоне пункты «Заказ» и «Гости» должны быть в меню:
+       старый брейкпоинт 450px оставлял кассу без навигации. */
+    .crm-page .for_mobile { display: block !important; }
     .crm-page .main { padding-top: 0; }
     .item { min-height: 96px; }
     .total_summ { width: auto; margin: 12px; }
@@ -2018,6 +2021,8 @@ ul.zakaz b:before { color: var(--text-mute); }
         left: auto !important;
         width: calc(100vw - 24px);
         max-width: 320px;
+        max-height: calc(100vh - 76px);
+        overflow-y: auto;
         background: var(--surface-2) !important;
     }
     .usertop.navbar { flex-wrap: nowrap; align-items: center; height: 60px; }
@@ -2098,6 +2103,160 @@ ul.zakaz b:before { color: var(--text-mute); }
 
 /* Empty ingredient container must not stretch the editor modal */
 .ingredients_place { min-height: 0; }
+
+/* ── Склад ─────────────────────────────────────────────────────────────── */
+#lager .lager-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 18px 0 16px;
+}
+#lager .lager-toolbar .lager-search { flex: 1 1 240px; min-width: 180px; }
+#lager .lager-toolbar .lager-place { flex: 0 1 240px; min-width: 180px; }
+#lager .lager-toolbar .lager-search,
+#lager .lager-toolbar .lager-place {
+    display: flex;
+    align-items: center;
+    height: 44px;
+}
+#lager .lager-toolbar .form-control {
+    height: 44px;
+    margin: 0;
+    border-radius: 10px;
+    background: var(--surface-2);
+    border-color: var(--border);
+}
+#lager .lager-toolbar .new_lager_item {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 10px;
+}
+#lager .lager-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+#lager .lager_table {
+    width: 100%;
+    min-width: 760px;
+    margin: 0;
+    border-collapse: collapse;
+    background: transparent;
+    color: var(--text);
+}
+#lager .lager_table thead th {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-mute);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+#lager .lager_table tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+#lager .lager_table tbody tr:last-child td { border-bottom: 0; }
+#lager .lager_table tbody tr:hover { background: var(--hover); }
+#lager .lager-name { min-width: 230px; display: flex; align-items: center; gap: 10px; }
+#lager .lager-name-body { min-width: 0; flex: 1 1 auto; }
+#lager .lager-name-text {
+    display: block;
+    color: var(--text);
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+#lager .lager-name small {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-mute);
+    font-size: 11.5px;
+    line-height: 1.3;
+}
+#lager .lager-name > .form-control {
+    flex: 1 1 auto;
+    height: 38px;
+    min-width: 0;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border-color: var(--border);
+}
+#lager .lager-edit {
+    float: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin: 0 8px 0 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text-mute);
+    cursor: pointer;
+    vertical-align: middle;
+}
+#lager .lager-edit:hover { color: var(--accent); border-color: var(--accent-line); }
+#lager .lager-edit.submit_lager_item { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+#lager .lager-edit i { font-size: 11px; }
+#lager .lager_table tr.is-editing { background: var(--surface-2); }
+#lager .lager-stock div {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+#lager .lager-stock .is-zero { color: var(--danger); }
+#lager .lager-unit { color: var(--text-mute); font-size: 13px; white-space: nowrap; }
+#lager .lager-action { min-width: 180px; }
+#lager .lager-action .m_select {
+    height: 40px;
+    min-width: 160px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text);
+}
+#lager .lager-qty { min-width: 110px; }
+#lager .lager-qty input {
+    height: 40px;
+    min-width: 90px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border-color: var(--border);
+    text-align: right;
+}
+#lager .lager-apply { width: 1%; white-space: nowrap; text-align: right; }
+#lager .lager-apply .save_lager_item {
+    display: none;
+    min-width: 118px;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 8px;
+}
+#lager .lager-apply .save_lager_item.btn-danger {
+    color: #f0b3ab;
+    background: rgba(232, 120, 107, .14);
+    border: 1px solid rgba(232, 120, 107, .5);
+}
+#lager .lager_table th:last-child,
+#lager .lager_table td:last-child { padding-right: 14px; }
+
+@media (max-width: 767.98px) {
+    #lager .lager-toolbar .lager-search,
+    #lager .lager-toolbar .lager-place,
+    #lager .lager-toolbar .new_lager_item { flex: 1 1 100%; width: 100%; }
+}
 
 /* Category editor row should not bleed outside the content column */
 .editor_item.row { margin-left: 0; margin-right: 0; }
@@ -2649,6 +2808,17 @@ body.shift-closing { overflow: hidden; }
 .shift-lines b { min-width: 110px; text-align: right; color: var(--text); font-weight: 650; font-variant-numeric: tabular-nums; }
 .shift-note { margin: var(--s4) 0 var(--s5); font-size: 13px; color: var(--text-mute); }
 .shift-exit { min-height: 48px; font-size: 15px; }
+.shift-screen .shift-exit,
+.shift-screen .shift-exit:visited,
+.shift-screen .shift-exit:hover,
+.shift-screen .shift-exit:focus {
+    color: var(--accent-ink) !important;
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    text-decoration: none;
+}
+.shift-screen .shift-exit:hover,
+.shift-screen .shift-exit:focus { background: var(--accent-2) !important; border-color: var(--accent-2) !important; }
 @media (max-width: 575.98px) {
     .shift-screen-card { padding: var(--s6) var(--s5); }
     .shift-total b { font-size: 36px; }
@@ -3867,6 +4037,47 @@ ul.special_tabs li a { padding: var(--s3) var(--s4); padding-right: 28px; font-w
 #menu .tab-pane > .progress { height: 2px; margin: 0; background: transparent; border-radius: 0; }
 #menu .tab-pane > .progress .progress-bar { background: var(--accent); background-image: none; }
 
+/* Подтверждение удаления позиции: слой внутри строки, а не белёсая полоса */
+#menu .for_blur { position: relative; }
+#menu .for_blur.del_alert { filter: none; -webkit-filter: none; }
+#menu .for_blur.del_alert .item_in_coll { filter: blur(1.5px); -webkit-filter: blur(1.5px); }
+#menu .alert_dialog {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s2);
+    width: auto;
+    margin: 0;
+    padding: 0 var(--s3);
+    background: rgba(18, 15, 13, .94);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-xs);
+}
+#menu .alert_dialog .btn-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 6px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface-3);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+#menu .alert_dialog .dell_this_item {
+    color: #f0b3ab;
+    border-color: rgba(232, 120, 107, .5);
+    background: rgba(232, 120, 107, .12);
+}
+#menu .alert_dialog .btn-link:hover { color: var(--text); border-color: var(--accent-line); background: var(--surface-2); }
+#menu .alert_dialog .dell_this_item:hover { color: #ffd2cc; border-color: rgba(232, 120, 107, .8); }
+
 @media (max-width: 767.98px) {
     #menu .editor_item.row > [class*="col-"]:first-child { flex: 1 1 100%; }
     #menu .editor_item.row > [class*="col-"]:last-child { margin-left: 0; flex: 1 1 100%; }
@@ -3979,6 +4190,36 @@ ul.menu_left li a.active i { color: var(--accent); }
 .user-dropdown.show .burger i:last-child,
 .user-dropdown.open .burger i:last-child { transform: rotate(-45deg); }
 
+/* Бургер панели: та же иконка, что в кассе */
+.panel-menu-toggle { display: none; }
+@media (max-width: 767.98px) {
+    body.layout .panel-sidebar { position: relative; }
+    .panel-menu-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 20;
+        width: 42px;
+        height: 40px;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface-2);
+        color: var(--text);
+        cursor: pointer;
+        transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+    }
+    .panel-menu-toggle:hover { background: var(--surface-3); border-color: var(--border-strong); }
+    .panel-menu-toggle:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+    .panel-menu-toggle[aria-expanded="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
+    .panel-menu-toggle[aria-expanded="true"] .burger i { top: 4.1px; width: 18px; }
+    .panel-menu-toggle[aria-expanded="true"] .burger i:first-child { transform: rotate(45deg); }
+    .panel-menu-toggle[aria-expanded="true"] .burger i:last-child { left: 0; transform: rotate(-45deg); }
+}
+
 /* Меню пользователя */
 .usertop .navbar-nav .dropdown-menu.usermenu {
     top: calc(100% + 10px);
@@ -4026,6 +4267,20 @@ ul.menu_left li a.active i { color: var(--accent); }
     color: var(--text);
 }
 .avara_text small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--text-mute); }
+.dropdown-menu.usermenu li.avara .avara-pet {
+    flex: 0 0 auto;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    color: var(--text-mute);
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.dropdown-menu.usermenu li.avara .avara-pet:hover { background: var(--hover); color: var(--accent); }
+.dropdown-menu.usermenu li.avara .avara-pet .pet-ico { margin-right: 0; }
 .dropdown-menu.usermenu > li > a {
     display: flex !important;
     align-items: center;
@@ -4056,6 +4311,32 @@ ul.menu_left li a.active i { color: var(--accent); }
     border-radius: var(--radius);
     border-color: var(--border-soft);
 }
+/* Откреплённый чек — компактная, но читаемая плавающая карточка */
+.total_summ.fixed {
+    width: 340px !important;
+    max-width: calc(100vw - 32px);
+    left: 16px;
+    right: auto;
+    bottom: 16px;
+    margin: 0;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    z-index: 2000;
+}
+@media (max-width: 767.98px) {
+    .total_summ.fixed {
+        width: calc(100vw - 24px) !important;
+        max-width: none;
+        left: 12px;
+        bottom: 12px;
+        max-height: calc(100vh - 24px);
+    }
+    .total_summ .bill-pin { display: none !important; }
+    .total_summ .bill-toggle { padding-right: 8px; }
+}
 .total_summ .maximize,
 .total_summ .minimize {
     top: var(--s3);
@@ -4074,9 +4355,70 @@ ul.menu_left li a.active i { color: var(--accent); }
 }
 .total_summ .maximize:hover, .total_summ .minimize:hover { background: var(--border-strong); }
 .total_summ .maximize:before, .total_summ .minimize:before { color: var(--text-dim); }
+.bill-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    min-height: 34px;
+    margin: 0;
+    padding: 7px 86px 7px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-mute);
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.bill-toggle:hover { background: var(--hover); color: var(--text); }
+.bill-toggle:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 1px; }
+.total_summ .bill-pin {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface-3);
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.total_summ .bill-pin:hover { background: var(--border-strong); color: var(--text); }
+.total_summ .bill-pin:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+.total_summ .bill-pin-label {
+    display: inline;
+    color: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+.total_summ .bill-toggle-label {
+    display: inline-block;
+    color: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+.bill-chevron { flex: 0 0 auto; transform: rotate(180deg); transition: transform var(--t-fast) var(--ease); }
+.total_summ.is-collapsed .bill-chevron { transform: none; }
+.total_summ.is-collapsed .bill-toggle { color: var(--accent-2); }
+.total_summ.is-collapsed ul.zakaz { display: none; }
 .total_summ .sum {
     display: inline-block;
-    margin-top: var(--s6);
+    margin-top: 8px;
     font-size: 34px;
     font-weight: 700;
     letter-spacing: -0.03em;
@@ -4476,6 +4818,14 @@ table.table[class*="col-"] { flex: none; max-width: 100%; padding: 0; }
     #statistic > .row:first-child > .col-md-4,
     #statistic > .row:first-child > .col-md-3 { grid-column: 1; grid-row: auto; }
     #statistic > .row:first-child > .col-md-12 { grid-row: auto; }
+    /* На мобильном быстрые периоды идут сразу под датами, до выбора кофейни */
+    #statistic > .row:first-child > .col-md-5 > span,
+    #statistic > .row:first-child > .col-md-5 > form { order: 1; }
+    #statistic > .row:first-child > .col-md-12 { order: 2; }
+    #statistic > .row:first-child > .col-md-4 { order: 3; }
+    #statistic > .row:first-child > .col-md-3 { order: 4; }
+    /* Ряд периодов ближе к датам и дальше от выбора кофейни */
+    #statistic > .row:first-child > .col-md-12 { margin-top: -10px; margin-bottom: 24px; }
     .crm-page .c2 { padding: var(--s5) var(--s4) var(--s10) !important; }
     #dash { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--s2); }
     .edit_g.guest, .edit_g { float: none !important; width: 100%; max-width: none; margin-bottom: var(--s4); }

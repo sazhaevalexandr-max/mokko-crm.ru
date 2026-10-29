@@ -63,6 +63,10 @@ RewriteRule (^|/)\.(git|svn|hg|bzr)(/|$) - [NC,R=404,L]
 # Служебные каталоги обновлений/резервных копий наружу не отдаём.
 RewriteRule ^storage(/|$) - [R=404,L]
 
+# Код приложения и тесты — только через index.php.
+RewriteRule ^app(/|$) - [R=404,L]
+RewriteRule ^tests(/|$) - [R=404,L]
+
 # Remove trailing slashes (skip directories)
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} ^(.+)/$

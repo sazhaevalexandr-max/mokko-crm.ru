@@ -285,6 +285,14 @@ function mokko_is_installed()
     }
 
     $installed = false;
+
+    // Быстрый путь: установщик создаёт lock только после успешной установки.
+    // Не делаем COUNT(*) users на каждом запросе панели/кассы.
+    if (is_file(__DIR__ . '/installed.lock') && is_file(__DIR__ . '/db_local.php')) {
+        $installed = true;
+        return $installed;
+    }
+
     try {
         require_once __DIR__ . '/db.php';
         $pdo = getDB();

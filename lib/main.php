@@ -31,6 +31,6 @@ if(!defined('MOKKO'))die;
 <script>
 window.location.href = <?= mokko_js(BASE_URL . '/login') ?>;
 </script>
-<? require_once('metrika.php'); ?>
+<?php require_once __DIR__ . '/metrika.php'; ?>
 </body>
 </html>

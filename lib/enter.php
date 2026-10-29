@@ -25,7 +25,7 @@
 <link rel="stylesheet" type="text/css" href="<?= BASE_PATH ?>/css/panel.css" />
 <link rel="stylesheet" type="text/css" href="<?= BASE_PATH ?>/css/jquery-confirm.css" />
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="<?= BASE_PATH ?>/js/jquery-1.11.1.min.js?v=1"></script>
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/bootstrap.min.js" ></script>
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/jquery-confirm.js"></script>
 
@@ -59,7 +59,7 @@ var sid = <?= mokko_js(isset($_SESSION['sid']) ? (string)$_SESSION['sid'] : '') 
 </div>
 
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/place.js"></script>
-<? require_once('metrika.php'); ?>
+<?php require_once __DIR__ . '/metrika.php'; ?>
 
 </body>
 </html>

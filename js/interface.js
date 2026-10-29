@@ -63,28 +63,50 @@ $(document).ready(function($) {
                                           }
                                           });
                   
-                  $('body').on('click','.total_summ .maximize', function(){
-                               $(this).removeClass('maximize').addClass('minimize');
-                               $(this).parent().addClass('fixed');
-                               $('#body').append($('.total_summ'));
+                  $('body').on('click','.bill-pin',function(){
+                               var $btn = $(this);
+                               var $bill = $btn.closest('.total_summ');
+                               var detach = !$bill.hasClass('fixed');
+                               $bill.toggleClass('fixed', detach);
+                               $btn.attr('aria-label', detach ? 'Закрепить чек' : 'Открепить чек');
+                               $btn.find('.bill-pin-label').text(detach ? 'Закрепить' : 'Открепить');
+                               if (detach) {
+                                   $('body').append($bill);
+                               } else if ($(window).width() <= 900) {
+                                   $('.main').append($bill);
+                               } else {
+                                   $('.left_bar').append($bill);
+                               }
+                               return false;
                                });
                   
-                  $('body').on('click','.total_summ .minimize',function(){
-                               $(this).removeClass('minimize').addClass('maximize');
-                               $(this).parent().removeClass('fixed');
-                               $('ul.zakaz').css('height','auto');
-                               $('.left_bar').append($('.total_summ'));
-                               $('.total_summ .not_short').addClass('short').removeClass('not_short');
-                               });
                   
-                  $('body').on('click','.short',function(){
-                               $('ul.zakaz').css('height','1px');
-                               $(this).addClass('not_short').removeClass('short');
-                               });
                   
-                  $('body').on('click','.not_short',function(){
-                               $('ul.zakaz').css('height','auto');
-                               $(this).addClass('short').removeClass('not_short');
+                  function placeBill() {
+                       var $bill = $('.total_summ');
+                       if (!$bill.length) { return; }
+                       if ($bill.hasClass('fixed')) {
+                           if ($bill.parent()[0] !== document.body) { $('body').append($bill); }
+                           $bill.find('.bill-pin-label').text('Закрепить');
+                           return;
+                       }
+                       $bill.find('.bill-pin-label').text('Открепить');
+                       if ($(window).width() <= 900) {
+                           if (!$bill.closest('.main').length) { $('.main').append($bill); }
+                       } else if (!$bill.closest('.left_bar').length) {
+                           $('.left_bar').append($bill);
+                       }
+                   }
+                   $(window).on('resize', placeBill);
+
+                   $('body').on('click','.bill-toggle',function(){
+                               var $btn = $(this);
+                               var $cart = $btn.closest('.total_summ');
+                               var collapsed = !$cart.hasClass('is-collapsed');
+                               $cart.toggleClass('is-collapsed', collapsed);
+                               $btn.attr('aria-expanded', collapsed ? 'false' : 'true');
+                               $btn.find('.bill-toggle-label').text(collapsed ? 'Развернуть чек' : 'Свернуть чек');
+                               return false;
                                });
                   
                   
@@ -124,7 +146,7 @@ $(document).ready(function($) {
                 ///
                                $.ajax({
                                       type: 'GET',
-                                      url: 'http://mokkoapi.azurewebsites.net/user/unlock/' + JSON.stringify({uid: uid, key: key, sid: sid, password: pass}).replace(/%/g, '%25'),
+                                      url: 'api://user/unlock/' + JSON.stringify({uid: uid, key: key, sid: sid, password: pass}).replace(/%/g, '%25'),
                                       success: function(data){
                                       console.log(data.unlock);
                                       if(data.unlock == "true"){

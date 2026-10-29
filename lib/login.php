@@ -13,7 +13,7 @@
 <link href="<?= mokko_h(BASE_PATH) ?>/css/bootstrap-4.6.2.min.css" rel="stylesheet">
 <link href="<?= mokko_h(BASE_PATH) ?>/css/glyphicons.css" rel="stylesheet">
 <link href="<?= mokko_h(BASE_PATH) ?>/css/theme.css?v=34" rel="stylesheet">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="<?= mokko_h(BASE_PATH) ?>/js/jquery-1.11.1.min.js?v=1"></script>
 <script src="<?= mokko_h(BASE_PATH) ?>/js/bootstrap-4.6.2.bundle.min.js"></script>
 <script src="<?= mokko_h(BASE_PATH) ?>/js/jquery-ui.js"></script>
 <script>var BASE_URL = <?= mokko_js(BASE_URL) ?>;</script>
