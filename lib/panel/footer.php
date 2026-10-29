@@ -125,8 +125,8 @@ $(document).ready(function() {
 
 
 <script type="text/javascript" src="<?= BASE_PATH ?>/js/api.js?v=1"></script>
-<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel/helpers.js?v=1"></script>
-<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel.js?ver=25"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel/helpers.js?v=2"></script>
+<script type="text/javascript" src="<?= BASE_PATH ?>/js/panel.js?ver=26"></script>
 
 <script type="text/javascript">
 // Мобильный бургер: клик по любому пункту меню закрывает список.

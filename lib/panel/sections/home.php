@@ -210,10 +210,10 @@
     <section class="plan-limits">
         <h3>Лимиты тарифа</h3>
         <ul>
-            <li><b>2</b><span>кофейни</span></li>
-            <li><b>5</b><span>категорий меню</span></li>
-            <li><b>40</b><span>позиций в меню</span></li>
-            <li><b>4</b><span>аккаунта сотрудников</span></li>
+            <li><b><?= \Mokko\Api\PlanLimits::PLACES ?></b><span>кофейни</span></li>
+            <li><b><?= \Mokko\Api\PlanLimits::CATEGORIES ?></b><span>категорий меню</span></li>
+            <li><b><?= \Mokko\Api\PlanLimits::ITEMS ?></b><span>позиций в меню</span></li>
+            <li><b><?= \Mokko\Api\PlanLimits::STAFF ?></b><span>аккаунта сотрудников</span></li>
         </ul>
     </section>
 </div>

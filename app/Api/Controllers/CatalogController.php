@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Mokko\Api\Controllers;
 
+use Mokko\Api\PlanLimits;
+
 /**
  * Меню: категории, массовая загрузка позиций и CRUD одной позиции.
  */
@@ -25,6 +27,12 @@ final class CatalogController extends ApiController
                 $name = \mokko_str(isset($p['name']) ? $p['name'] : 'Название', 255);
                 $status = (isset($p['status']) && $p['status'] === 'off') ? 'off' : 'on';
                 $name = ($name !== '' ? $name : 'Название');
+
+                $countStmt = $pdo->prepare('SELECT COUNT(*) FROM categories WHERE uid = ?');
+                $countStmt->execute(array($uid));
+                if ((int)$countStmt->fetchColumn() >= PlanLimits::CATEGORIES) {
+                    \mokko_json(array('error' => 'Лимит тарифа: не более ' . PlanLimits::CATEGORIES . ' категорий меню.'));
+                }
 
                 $stmt = $pdo->prepare('INSERT INTO categories (uid, name, status) VALUES (?, ?, ?)');
                 $stmt->execute(array($uid, $name, $status));
@@ -93,6 +101,12 @@ final class CatalogController extends ApiController
 
         switch ($this->action()) {
             case 'new':
+                $countStmt = $pdo->prepare('SELECT COUNT(*) FROM items WHERE uid = ?');
+                $countStmt->execute(array($uid));
+                if ((int)$countStmt->fetchColumn() >= PlanLimits::ITEMS) {
+                    \mokko_json(array('error' => 'Лимит тарифа: не более ' . PlanLimits::ITEMS . ' позиций меню.'));
+                }
+
                 $category = (int)(isset($p['category']) ? $p['category'] : 0);
                 $stmt = $pdo->prepare('INSERT INTO items (uid, category_id, name, price, mass, em, ingredients) VALUES (?, ?, ?, ?, ?, ?, ?)');
                 $stmt->execute(array($uid, $category, 'Название', 0, 0, 1, '[]'));

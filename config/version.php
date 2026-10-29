@@ -9,5 +9,5 @@ if (!defined('MOKKO_VERSION')) {
 }
 
 if (!defined('MOKKO_BUILD')) {
-    define('MOKKO_BUILD', '2026-10-28');
+    define('MOKKO_BUILD', '2026-10-29');
 }

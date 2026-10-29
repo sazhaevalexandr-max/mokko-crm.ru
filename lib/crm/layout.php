@@ -37,7 +37,7 @@
 <link rel="stylesheet" href="<?= BASE_PATH ?>/css/offline-theme-slide.css" />
 <link rel="stylesheet" href="<?= BASE_PATH ?>/css/offline-language-english.css" />
 
-<link href="<?= BASE_PATH ?>/css/theme.css?v=59" rel="stylesheet">
+<link href="<?= BASE_PATH ?>/css/theme.css?v=62" rel="stylesheet">
 
 <style type="text/css">
 .jconfirm.jconfirm-white .jconfirm-bg {

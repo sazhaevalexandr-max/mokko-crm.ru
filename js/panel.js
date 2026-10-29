@@ -1,5 +1,4 @@
-// Явные переменные, которые раньше создавались неявно внутри обработчиков.
-// Это уменьшает загрязнение window и готовит файл к strict mode.
+var MOKKO_PLAN = window.MOKKO_PLAN || { places: 2, categories: 5, items: 40, staff: 4 };
 var payed, check, i, day, month, year, day2, month2, year2,
     start_date, stop_date, data_arr, value_of_input, id_mini_alerts,
     total, totala_b, qu, styles_red, massa, ing;
@@ -194,8 +193,8 @@ $(document).ready(function($) {
                            
                   
                   $('.create_place').click(function(){
-                                           if($('#places .panel-default').length >= 2){
-                                               $.alert({ title: 'Лимит тарифа', content: 'На вашем тарифе можно добавить до 2 кофеен.', confirmButton: 'Понятно' });
+                                           if($('#places .panel-default').length >= MOKKO_PLAN.places){
+                                               $.alert({ title: 'Лимит тарифа', content: 'На вашем тарифе можно добавить не более ' + MOKKO_PLAN.places + ' кофеен.', confirmButton: 'Понятно' });
                                                return;
                                            }
                                            $.confirm({
@@ -1198,7 +1197,7 @@ $('#lager tbody').append(lagerRowHtml(lager.id, lager.name, massa, em));
                             
                              if(category == ''){
                              
-                               if($('ul.category_tabs li').length < 6){
+                               if($('ul.category_tabs li').length < (MOKKO_PLAN.categories + 1)){
                              
                              $.ajax({
                                     
@@ -1238,8 +1237,8 @@ $('#lager tbody').append(lagerRowHtml(lager.id, lager.name, massa, em));
                                     })
                              }else{
                              $.alert({
-                                     title:"Увы",
-                                     content: "Максимальное число категорий достигнуто",
+                                     title:"Лимит тарифа",
+                                     content: "Максимальное число категорий достигнуто: " + MOKKO_PLAN.categories + ".",
                                      confirmButton: 'Ок'
                                      });
                              }

@@ -56,7 +56,10 @@
     <section class="settings-card">
         <header class="settings-card-head"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 8.6c0 5.2-8.8 10.4-8.8 10.4S3.2 13.8 3.2 8.6A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8.8 1.6z"/></svg><h3>Поддержать проект</h3></header>
         <p class="set-support-copy">MOKKO CRM — некоммерческий проект. Донаты помогают окупать разработку в свободное время и выпускать новые модули и обновления. Любая поддержка важна.</p>
-        <a class="btn btn-primary set-support-btn" href="https://boosty.to/alexandr220/donate" target="_blank" rel="noopener noreferrer">Поддержать на Boosty</a>
+        <div class="set-support-actions">
+            <a class="btn btn-primary set-support-btn" href="https://boosty.to/alexandr220/donate" target="_blank" rel="noopener noreferrer">Boosty</a>
+            <a class="btn btn-default set-support-btn set-support-btn--patreon" href="https://www.patreon.com/17044006/join" target="_blank" rel="noopener noreferrer">Patreon</a>
+        </div>
         <p class="set-support-note">Это не оплата подписки — просто поддержка автора.</p>
     </section>
 

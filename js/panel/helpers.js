@@ -228,7 +228,7 @@ function placeForm(formId, place) {
 }
 
 // ── Сотрудники: карточки, формы и действия ─────────────────────────────────
-var STAFF_LIMIT = 4; // как в «Лимитах тарифа»
+var STAFF_LIMIT = (window.MOKKO_PLAN && Number(window.MOKKO_PLAN.staff)) || 4;
 function staffHas(v) { return v != null && v !== '' && v !== 'null' && v !== 'undefined'; }
 function staffRate(v) { var n = Number(v); return isFinite(n) && n > 0 ? String(Math.round(n * 100) / 100).replace('.', ',') : ''; }
 function staffCard(s) {

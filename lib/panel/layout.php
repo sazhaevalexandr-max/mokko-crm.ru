@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="<?= BASE_PATH ?>/css/chartist.css">
 <link rel="stylesheet" href="<?= BASE_PATH ?>/css/chartist-plugin-tooltip.css">
 
-<link href="<?= BASE_PATH ?>/css/theme.css?v=59" rel="stylesheet">
+<link href="<?= BASE_PATH ?>/css/theme.css?v=62" rel="stylesheet">
 <?php mokko_hook('panel.head'); ?>
 
 <script src="<?= BASE_PATH ?>/js/jquery-1.11.1.min.js?v=1"></script>
@@ -50,6 +50,7 @@
 
 <script>
 var BASE_URL = <?= mokko_js(BASE_URL) ?>;
+var MOKKO_PLAN = <?= json_encode(\Mokko\Api\PlanLimits::all()) ?>;
 var key = <?= mokko_js(isset($_SESSION['key']) ? (string)$_SESSION['key'] : '') ?>;
 var uid = <?= mokko_js(isset($_SESSION['uid']) ? (string)$_SESSION['uid'] : '') ?>;
 var sid = <?= mokko_js(isset($_SESSION['sid']) ? (string)$_SESSION['sid'] : '') ?>;
@@ -130,7 +131,10 @@ var sid = <?= mokko_js(isset($_SESSION['sid']) ? (string)$_SESSION['sid'] : '') 
 <b>Поддержать проект</b>
 </div>
 <p class="ballance-support-text">MOKKO CRM — некоммерческий проект. Донаты помогают окупать разработку в свободное время и выпускать новые модули и обновления.</p>
-<a class="btn btn-primary btn-xs ballance-support-btn" href="https://boosty.to/alexandr220/donate" target="_blank" rel="noopener noreferrer">Поддержать на Boosty</a>
+<div class="ballance-support-actions">
+<a class="btn btn-primary btn-xs ballance-support-btn" href="https://boosty.to/alexandr220/donate" target="_blank" rel="noopener noreferrer">Boosty</a>
+<a class="btn btn-default btn-xs ballance-support-btn ballance-support-btn--patreon" href="https://www.patreon.com/17044006/join" target="_blank" rel="noopener noreferrer">Patreon</a>
+</div>
 </div>
 </div>
 </div>

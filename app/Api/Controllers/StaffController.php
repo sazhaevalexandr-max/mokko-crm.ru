@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Mokko\Api\Controllers;
 
 use Mokko\Api\CrmSupport;
+use Mokko\Api\PlanLimits;
 
 /**
  * Сотрудники и настройки владельца.
@@ -38,6 +39,12 @@ final class StaffController extends ApiController
                 $loginError = CrmSupport::staffLoginError($pdo, $login);
                 if ($loginError !== '') {
                     \mokko_json(array('error' => $loginError));
+                }
+
+                $countStmt = $pdo->prepare('SELECT COUNT(*) FROM staff WHERE uid = ?');
+                $countStmt->execute(array($uid));
+                if ((int)$countStmt->fetchColumn() >= PlanLimits::STAFF) {
+                    \mokko_json(array('error' => 'Лимит тарифа: не более ' . PlanLimits::STAFF . ' сотрудников.'));
                 }
 
                 $stmt = $pdo->prepare('INSERT INTO staff (uid, name, lastname, email, phone, rate, password_hash) VALUES (?, ?, ?, ?, ?, ?, ?)');

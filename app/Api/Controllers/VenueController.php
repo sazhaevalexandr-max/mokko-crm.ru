@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Mokko\Api\Controllers;
 
 use Mokko\Api\CrmSupport;
+use Mokko\Api\PlanLimits;
 
 /**
  * Кофейни, склад и гости текущей точки.
@@ -48,6 +49,12 @@ final class VenueController extends ApiController
                 $err = CrmSupport::requisitesError($inn, $kpp, $phone);
                 if ($err !== '') {
                     \mokko_json(array('error' => $err));
+                }
+
+                $countStmt = $pdo->prepare('SELECT COUNT(*) FROM places WHERE user_id = ?');
+                $countStmt->execute(array($uid));
+                if ((int)$countStmt->fetchColumn() >= PlanLimits::PLACES) {
+                    \mokko_json(array('error' => 'Лимит тарифа: можно добавить не более ' . PlanLimits::PLACES . ' кофеен.'));
                 }
 
                 $stmt = $pdo->prepare('INSERT INTO places (user_id, name, address, inn, kpp, ltd, phone) VALUES (?, ?, ?, ?, ?, ?, ?)');
